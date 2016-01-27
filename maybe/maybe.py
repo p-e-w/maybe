@@ -26,6 +26,14 @@ from syscall_filters import SYSCALL_FILTERS
 from utilities import T, SYSCALL_REGISTER, RETURN_VALUE_REGISTER
 
 
+# Python 2/3 compatibility hack
+# Source: http://stackoverflow.com/a/7321970
+try:
+    input = raw_input
+except NameError:
+    pass
+
+
 # Register filtered syscalls with python-ptrace so they are parsed correctly
 SYSCALL_PROTOTYPES.clear()
 FILENAME_ARGUMENTS.clear()
@@ -53,6 +61,9 @@ def parse_argument(argument):
     if argument.startswith("'"):
         # Remove quotes from string argument
         return argument[1:-1]
+    elif argument.startswith("b'"):
+        # Python 3 bytes literal
+        return argument[2:-1]
     else:
         # Note that "int" with base 0 infers the base from the prefix
         return int(argument, 0)
@@ -150,7 +161,7 @@ def main():
         for operation in operations:
             print("  " + operation)
         try:
-            choice = raw_input("\nDo you want to rerun %s and permit these operations? [y/N] " % T.bold(command))
+            choice = input("\nDo you want to rerun %s and permit these operations? [y/N] " % T.bold(command))
         except KeyboardInterrupt:
             choice = ""
         if choice.lower() == "y":

@@ -28,7 +28,7 @@ That being said, `maybe` **should :warning: NEVER :warning: be used to run untru
 
 ## Installation
 
-`maybe` requires [Python](https://www.python.org/) 2.7+ :snake:. It has been tested on Linux :penguin:, but should work on most Unixes, possibly including OS X. If you have the [pip](https://pip.pypa.io) package manager, all you need to do is run
+`maybe` requires [Python](https://www.python.org/) 2.7+/3.2+ :snake:. It has been tested on Linux :penguin:, but should work on most Unixes, possibly including OS X. If you have the [pip](https://pip.pypa.io) package manager, all you need to do is run
 
 ```
 pip install maybe
