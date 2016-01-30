@@ -28,13 +28,21 @@ That being said, `maybe` **should :warning: NEVER :warning: be used to run untru
 
 ## Installation
 
-`maybe` requires [Python](https://www.python.org/) 2.7+/3.2+ :snake:. It has been tested on Linux :penguin:, but should work on most Unixes, possibly including OS X. If you have the [pip](https://pip.pypa.io) package manager, all you need to do is run
+`maybe` requires [Python](https://www.python.org/) 2.7+/3.2+ :snake:. If you have the [pip](https://pip.pypa.io) package manager, all you need to do is run
 
 ```
 pip install maybe
 ```
 
 either as a superuser or from a [virtualenv](https://virtualenv.pypa.io) environment.
+
+### Operating system support
+
+| OS | Support status |
+| --- | --- |
+| Linux | :white_check_mark: Full support |
+| FreeBSD / OpenBSD | :ballot_box_with_check: Limited support (subprocesses can not be intercepted) |
+| OS X | :question: Might be supported in future pending OS X support in python-ptrace |
 
 
 ## Usage
