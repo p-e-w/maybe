@@ -155,9 +155,18 @@ def main():
     process = debugger.addProcess(pid, True)
     prepareProcess(process)
 
-    operations = get_operations(debugger)
-
-    debugger.quit()
+    try:
+        operations = get_operations(debugger)
+    except Exception as error:
+        print(T.red("Error tracing process: %s." % error))
+        exit(1)
+    except KeyboardInterrupt:
+        print(T.yellow("%s terminated by keyboard interrupt." % (T.bold(command) + T.yellow)))
+        exit(2)
+    finally:
+        # Cut down all processes no matter what happens
+        # to prevent them from doing any damage
+        debugger.quit()
 
     if operations:
         print("%s has prevented %s from performing %d file system operations:\n" %
