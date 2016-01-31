@@ -14,7 +14,7 @@ from collections import namedtuple
 from os import O_WRONLY, O_RDWR, O_APPEND, O_CREAT, O_TRUNC
 from os.path import abspath, dirname, basename, exists
 
-from utilities import T, format_permissions
+from .utilities import T, format_permissions
 
 
 def return_zero(args):

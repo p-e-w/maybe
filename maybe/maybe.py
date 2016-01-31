@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # maybe - see what a program does before deciding whether you really want it to happen
 #
 # Copyright (c) 2016 Philipp Emanuel Weidmann <pew@worldwidemann.com>
@@ -22,8 +20,8 @@ from ptrace.syscall import SYSCALL_PROTOTYPES, FILENAME_ARGUMENTS
 from ptrace.syscall.posix_constants import SYSCALL_ARG_DICT
 from ptrace.syscall.syscall_argument import ARGUMENT_CALLBACK
 
-from syscall_filters import SYSCALL_FILTERS
-from utilities import T, SYSCALL_REGISTER, RETURN_VALUE_REGISTER
+from .syscall_filters import SYSCALL_FILTERS
+from .utilities import T, SYSCALL_REGISTER, RETURN_VALUE_REGISTER
 
 
 # Python 2/3 compatibility hack
@@ -182,7 +180,3 @@ def main():
     else:
         print("%s has not detected any file system operations from %s." %
               (T.bold("maybe"), T.bold(command)))
-
-
-if __name__ == "__main__":
-    main()

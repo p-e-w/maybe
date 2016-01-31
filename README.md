@@ -34,7 +34,13 @@ That being said, `maybe` **should :warning: NEVER :warning: be used to run untru
 pip install maybe
 ```
 
-either as a superuser or from a [virtualenv](https://virtualenv.pypa.io) environment.
+either as a superuser or from a [virtualenv](https://virtualenv.pypa.io) environment. To develop `maybe`, clone the repository and run
+
+```
+pip install -e .
+```
+
+in its main directory to install the package in editable mode.
 
 ### Operating system support
 
