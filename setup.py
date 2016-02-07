@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 setup(
     name="maybe",
 
-    version="0.2.1",
+    version="0.3.0",
 
     description="See what a program does before deciding whether you really want it to happen.",
     long_description="For a detailed description, see https://github.com/p-e-w/maybe.",
