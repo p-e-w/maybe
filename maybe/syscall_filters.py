@@ -80,9 +80,14 @@ def get_file_descriptor_path(file_descriptor):
     return file_descriptors.get(file_descriptor, "/dev/fd/%d" % file_descriptor)
 
 
+allowed_files = set(["/dev/null", "/dev/zero", "/dev/tty"])
+
+
 def format_open(path, flags):
     path = abspath(path)
-    if (flags & O_CREAT) and not exists(path):
+    if path in allowed_files:
+        return None
+    elif (flags & O_CREAT) and not exists(path):
         return "%s %s" % (T.cyan("create file"), T.underline(path))
     elif (flags & O_TRUNC) and exists(path):
         return "%s %s" % (T.red("truncate file"), T.underline(path))
@@ -92,8 +97,7 @@ def format_open(path, flags):
 
 def substitute_open(path, flags):
     path = abspath(path)
-    if path == "/dev/tty":
-        # Allow full access to terminal device
+    if path in allowed_files:
         return None
     elif (flags & O_WRONLY) or (flags & O_RDWR) or (flags & O_APPEND) or (format_open(path, flags) is not None):
         # File might be written to later, so we need to track the file descriptor
