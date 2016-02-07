@@ -56,10 +56,10 @@ def prepareProcess(process):
 
 def parse_argument(argument):
     argument = argument.createText()
-    if argument.startswith("'"):
+    if argument.startswith(("'", '"')):
         # Remove quotes from string argument
         return argument[1:-1]
-    elif argument.startswith("b'"):
+    elif argument.startswith(("b'", 'b"')):
         # Python 3 bytes literal
         return argument[2:-1]
     else:
