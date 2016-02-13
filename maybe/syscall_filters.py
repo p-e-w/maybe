@@ -136,12 +136,6 @@ SyscallFilter = namedtuple("SyscallFilter", ["name", "signature", "format", "sub
 SYSCALL_FILTERS = [
 # Delete
 SyscallFilter(
-    name="remove",
-    signature=("int", (("const char *", "pathname"),)),
-    format=lambda args: format_delete(args[0]),
-    substitute=return_zero
-),
-SyscallFilter(
     name="unlink",
     signature=("int", (("const char *", "pathname"),)),
     format=lambda args: format_delete(args[0]),
