@@ -11,15 +11,11 @@
 from pwd import getpwuid
 from grp import getgrgid
 from collections import namedtuple
-from os import O_WRONLY, O_RDWR, O_APPEND, O_CREAT, O_TRUNC
-from stat import S_IFREG, S_IFIFO, S_IFBLK, S_IFCHR, S_IFSOCK
 from os.path import abspath, dirname, basename, exists
+from os import O_WRONLY, O_RDWR, O_APPEND, O_CREAT, O_TRUNC
+from stat import S_IFCHR, S_IFBLK, S_IFIFO, S_IFSOCK
 
 from .utilities import T, format_permissions
-
-
-def return_zero(args):
-    return 0
 
 
 def format_delete(path):
@@ -113,22 +109,22 @@ def format_mknod(path, type):
     path = abspath(path)
     if exists(path):
         return None
-    elif (type & S_IFREG):
-        return "%s %s" % (T.cyan("create file"), T.underline(path))
-    elif (type & S_IFIFO):
-        return "%s %s" % (T.cyan("create named pipe"), T.underline(path))
     elif (type & S_IFCHR):
-        return "%s %s" % (T.cyan("create character special file"), T.underline(path))
+        label = "create character special file"
     elif (type & S_IFBLK):
-        return "%s %s" % (T.cyan("create block special file"), T.underline(path))
+        label = "create block special file"
+    elif (type & S_IFIFO):
+        label = "create named pipe"
     elif (type & S_IFSOCK):
-        return "%s %s" % (T.cyan("create socket"), T.underline(path))
+        label = "create socket"
     else:
-        return None
+        # mknod(2): "Zero file type is equivalent to type S_IFREG"
+        label = "create file"
+    return "%s %s" % (T.cyan(label), T.underline(path))
 
 
 def substitute_mknod(path, type):
-    return None if (format_mknod(path, type) is None) else 0 
+    return None if (format_mknod(path, type) is None) else 0
 
 
 def format_write(file_descriptor, byte_count):
@@ -155,6 +151,9 @@ def substitute_dup(file_descriptor_old, file_descriptor_new=None):
 
 
 SyscallFilter = namedtuple("SyscallFilter", ["name", "signature", "format", "substitute"])
+# Make returning zero the default substitute function
+# Source: http://stackoverflow.com/a/18348004
+SyscallFilter.__new__.__defaults__ = (lambda args: 0,)
 
 SYSCALL_FILTERS = [
 # Delete
@@ -162,124 +161,105 @@ SyscallFilter(
     name="unlink",
     signature=("int", (("const char *", "pathname"),)),
     format=lambda args: format_delete(args[0]),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="unlinkat",
     signature=("int", (("int", "dirfd"), ("const char *", "pathname"), ("int", "flags"),)),
     format=lambda args: format_delete(args[1]),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="rmdir",
     signature=("int", (("const char *", "pathname"),)),
     format=lambda args: format_delete(args[0]),
-    substitute=return_zero
 ),
 # Move
 SyscallFilter(
     name="rename",
     signature=("int", (("const char *", "oldpath"), ("const char *", "newpath"),)),
     format=lambda args: format_move(args[0], args[1]),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="renameat",
     signature=("int", (("int", "olddirfd"), ("const char *", "oldpath"),
                        ("int", "newdirfd"), ("const char *", "newpath"),)),
     format=lambda args: format_move(args[1], args[3]),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="renameat2",
     signature=("int", (("int", "olddirfd"), ("const char *", "oldpath"),
                        ("int", "newdirfd"), ("const char *", "newpath"), ("unsigned int", "flags"),)),
     format=lambda args: format_move(args[1], args[3]),
-    substitute=return_zero
 ),
 # Change permissions
 SyscallFilter(
     name="chmod",
     signature=("int", (("const char *", "pathname"), ("mode_t", "mode"),)),
     format=lambda args: format_change_permissions(args[0], args[1]),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="fchmod",
     signature=("int", (("int", "fd"), ("mode_t", "mode"),)),
     format=lambda args: format_change_permissions(get_file_descriptor_path(args[0]), args[1]),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="fchmodat",
     signature=("int", (("int", "dirfd"), ("const char *", "pathname"), ("mode_t", "mode"), ("int", "flags"),)),
     format=lambda args: format_change_permissions(args[1], args[2]),
-    substitute=return_zero
 ),
 # Change owner
 SyscallFilter(
     name="chown",
     signature=("int", (("const char *", "pathname"), ("uid_t", "owner"), ("gid_t", "group"),)),
     format=lambda args: format_change_owner(args[0], args[1], args[2]),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="fchown",
     signature=("int", (("int", "fd"), ("uid_t", "owner"), ("gid_t", "group"),)),
     format=lambda args: format_change_owner(get_file_descriptor_path(args[0]), args[1], args[2]),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="lchown",
     signature=("int", (("const char *", "pathname"), ("uid_t", "owner"), ("gid_t", "group"),)),
     format=lambda args: format_change_owner(args[0], args[1], args[2]),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="fchownat",
     signature=("int", (("int", "dirfd"), ("const char *", "pathname"),
                        ("uid_t", "owner"), ("gid_t", "group"), ("int", "flags"),)),
     format=lambda args: format_change_owner(args[1], args[2], args[3]),
-    substitute=return_zero
 ),
 # Create directory
 SyscallFilter(
     name="mkdir",
     signature=("int", (("const char *", "pathname"), ("mode_t", "mode"),)),
     format=lambda args: format_create_directory(args[0]),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="mkdirat",
     signature=("int", (("int", "dirfd"), ("const char *", "pathname"), ("mode_t", "mode"),)),
     format=lambda args: format_create_directory(args[1]),
-    substitute=return_zero
 ),
 # Create link
 SyscallFilter(
     name="link",
     signature=("int", (("const char *", "oldpath"), ("const char *", "newpath"),)),
     format=lambda args: format_create_link(args[1], args[0], False),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="linkat",
     signature=("int", (("int", "olddirfd"), ("const char *", "oldpath"),
                        ("int", "newdirfd"), ("const char *", "newpath"), ("int", "flags"),)),
     format=lambda args: format_create_link(args[3], args[1], False),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="symlink",
     signature=("int", (("const char *", "target"), ("const char *", "linkpath"),)),
     format=lambda args: format_create_link(args[1], args[0], True),
-    substitute=return_zero
 ),
 SyscallFilter(
     name="symlinkat",
     signature=("int", (("const char *", "target"), ("int", "newdirfd"), ("const char *", "linkpath"),)),
     format=lambda args: format_create_link(args[2], args[0], True),
-    substitute=return_zero
 ),
 # Open/create file
 SyscallFilter(
@@ -287,20 +267,20 @@ SyscallFilter(
     # TODO: "open" is overloaded (a version with 3 arguments also exists). Are both handled properly?
     signature=("int", (("const char *", "pathname"), ("int", "flags"),)),
     format=lambda args: format_open(args[0], args[1]),
-    substitute=lambda args: substitute_open(args[0], args[1])
+    substitute=lambda args: substitute_open(args[0], args[1]),
 ),
 SyscallFilter(
     name="creat",
     signature=("int", (("const char *", "pathname"), ("mode_t", "mode"),)),
     format=lambda args: format_open(args[0], O_CREAT | O_WRONLY | O_TRUNC),
-    substitute=lambda args: substitute_open(args[0], O_CREAT | O_WRONLY | O_TRUNC)
+    substitute=lambda args: substitute_open(args[0], O_CREAT | O_WRONLY | O_TRUNC),
 ),
 SyscallFilter(
     name="openat",
     # TODO: "openat" is overloaded (see above)
     signature=("int", (("int", "dirfd"), ("const char *", "pathname"), ("int", "flags"),)),
     format=lambda args: format_open(args[1], args[2]),
-    substitute=lambda args: substitute_open(args[1], args[2])
+    substitute=lambda args: substitute_open(args[1], args[2]),
 ),
 SyscallFilter(
     name="mknod",
@@ -327,50 +307,49 @@ SyscallFilter(
     substitute=lambda args: substitute_mknod(args[1], S_IFIFO),
 ),
 # Write to file
-# TODO: Handle "fwrite"?
 SyscallFilter(
     name="write",
     signature=("ssize_t", (("int", "fd"), ("const void *", "buf"), ("size_t", "count"),)),
     format=lambda args: format_write(args[0], args[2]),
-    substitute=lambda args: substitute_write(args[0], args[2])
+    substitute=lambda args: substitute_write(args[0], args[2]),
 ),
 SyscallFilter(
     name="pwrite",
     signature=("ssize_t", (("int", "fd"), ("const void *", "buf"), ("size_t", "count"), ("off_t", "offset"),)),
     format=lambda args: format_write(args[0], args[2]),
-    substitute=lambda args: substitute_write(args[0], args[2])
+    substitute=lambda args: substitute_write(args[0], args[2]),
 ),
 SyscallFilter(
     name="writev",
     signature=("ssize_t", (("int", "fd"), ("const struct iovec *", "iov"), ("int", "iovcnt"),)),
     # TODO: Actual byte count is iovcnt * iov.iov_len
     format=lambda args: format_write(args[0], args[2]),
-    substitute=lambda args: substitute_write(args[0], args[2])
+    substitute=lambda args: substitute_write(args[0], args[2]),
 ),
 SyscallFilter(
     name="pwritev",
     signature=("ssize_t", (("int", "fd"), ("const struct iovec *", "iov"), ("int", "iovcnt"), ("off_t", "offset"),)),
     # TODO: Actual byte count is iovcnt * iov.iov_len
     format=lambda args: format_write(args[0], args[2]),
-    substitute=lambda args: substitute_write(args[0], args[2])
+    substitute=lambda args: substitute_write(args[0], args[2]),
 ),
 # Duplicate file descriptor
 SyscallFilter(
     name="dup",
     signature=("int", (("int", "oldfd"),)),
     format=lambda args: None,
-    substitute=lambda args: substitute_dup(args[0])
+    substitute=lambda args: substitute_dup(args[0]),
 ),
 SyscallFilter(
     name="dup2",
     signature=("int", (("int", "oldfd"), ("int", "newfd"),)),
     format=lambda args: None,
-    substitute=lambda args: substitute_dup(args[0], args[1])
+    substitute=lambda args: substitute_dup(args[0], args[1]),
 ),
 SyscallFilter(
     name="dup3",
     signature=("int", (("int", "oldfd"), ("int", "newfd"), ("int", "flags"),)),
     format=lambda args: None,
-    substitute=lambda args: substitute_dup(args[0], args[1])
+    substitute=lambda args: substitute_dup(args[0], args[1]),
 ),
 ]
