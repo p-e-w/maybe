@@ -8,6 +8,7 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
+from logging import getLogger, NullHandler
 from sys import argv, exit
 from subprocess import call
 
@@ -30,6 +31,10 @@ try:
     input = raw_input
 except NameError:
     pass
+
+
+# Suppress logging output from python-ptrace
+getLogger().addHandler(NullHandler())
 
 
 # Register filtered syscalls with python-ptrace so they are parsed correctly
