@@ -12,6 +12,7 @@ __pycache__/
 
 # Testing
 .cache/
+.tox/
 
 # Distribution / packaging
 bin/
