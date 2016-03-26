@@ -1,4 +1,19 @@
-[![PyPI](https://img.shields.io/pypi/v/maybe.svg)](https://pypi.python.org/pypi/maybe) ![Python versions](https://img.shields.io/pypi/pyversions/maybe.svg)
+<table>
+  <tr>
+    <td>**Package**</td>
+    <td>
+      [![PyPI](https://img.shields.io/pypi/v/maybe.svg)](https://pypi.python.org/pypi/maybe)
+      ![Python versions](https://img.shields.io/pypi/pyversions/maybe.svg)
+    </td>
+  </tr>
+  <tr>
+    <td>**Tests**</td>
+    <td>
+      [![Build Status](https://travis-ci.org/p-e-w/maybe.svg?branch=master)](https://travis-ci.org/p-e-w/maybe)
+    </td>
+  </tr>
+</table>
+
 
 ---
 
