@@ -45,8 +45,8 @@ setup(
     packages=find_packages(),
 
     install_requires=[
-        "blessings",
-        "python-ptrace",
+        "blessings==1.6",
+        "python-ptrace==0.8.1",
     ],
 
     entry_points={
