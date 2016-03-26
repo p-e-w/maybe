@@ -180,6 +180,8 @@ def main():
             choice = input("\nDo you want to rerun %s and permit these operations? [y/N] " % T.bold(command))
         except KeyboardInterrupt:
             choice = ""
+            # Ctrl+C does not print a newline automatically
+            print("")
         if choice.lower() == "y":
             call(argv[1:])
     else:
