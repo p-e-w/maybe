@@ -8,9 +8,9 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
+import sys
+import subprocess
 from logging import getLogger, NullHandler
-from sys import argv, exit
-from subprocess import call
 
 from ptrace.tools import locateProgram
 from ptrace.debugger import ProcessSignal, NewProcessEvent, ProcessExecution, ProcessExit
@@ -129,11 +129,11 @@ def get_operations(debugger):
     return operations
 
 
-def main():
+def main(argv=sys.argv):
     if len(argv) < 2:
         print(T.red("Error: No command given."))
         print("Usage: %s COMMAND [ARGUMENT]..." % argv[0])
-        exit(1)
+        return 1
 
     # This is basically "shlex.join"
     command = " ".join([(("'%s'" % arg) if (" " in arg) else arg) for arg in argv[1:]])
@@ -145,7 +145,7 @@ def main():
         pid = createChild(arguments, False)
     except Exception as error:
         print(T.red("Error executing %s: %s." % (T.bold(command) + T.red, error)))
-        exit(1)
+        return 1
 
     debugger = PtraceDebugger()
     debugger.traceExec()
@@ -162,10 +162,10 @@ def main():
         operations = get_operations(debugger)
     except Exception as error:
         print(T.red("Error tracing process: %s." % error))
-        exit(1)
+        return 1
     except KeyboardInterrupt:
         print(T.yellow("%s terminated by keyboard interrupt." % (T.bold(command) + T.yellow)))
-        exit(2)
+        return 2
     finally:
         # Cut down all processes no matter what happens
         # to prevent them from doing any damage
@@ -183,7 +183,7 @@ def main():
             # Ctrl+C does not print a newline automatically
             print("")
         if choice.lower() == "y":
-            call(argv[1:])
+            subprocess.call(argv[1:])
     else:
         print("%s has not detected any file system operations from %s." %
               (T.bold("maybe"), T.bold(command)))

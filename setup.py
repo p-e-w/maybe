@@ -1,6 +1,6 @@
 # Based on setup.py from https://github.com/pypa/sampleproject
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name="maybe",
@@ -42,7 +42,7 @@ setup(
 
     keywords="sandbox files access",
 
-    packages=find_packages(),
+    packages=["maybe"],
 
     install_requires=[
         "blessings==1.6",

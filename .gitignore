@@ -10,6 +10,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Testing
+.cache/
+
 # Distribution / packaging
 bin/
 build/
