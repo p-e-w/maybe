@@ -49,6 +49,13 @@ setup(
         "python-ptrace==0.8.1",
     ],
 
+    setup_requires=[
+        "pytest-runner>=2.7",
+    ],
+    tests_require=[
+        "pytest>=2.9.1",
+    ],
+
     entry_points={
         "console_scripts": [
             "maybe = maybe.maybe:main",
