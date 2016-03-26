@@ -1,15 +1,19 @@
 <table>
   <tr>
-    <td>**Package**</td>
+    <td><strong>Package</strong></td>
     <td>
-      [![PyPI](https://img.shields.io/pypi/v/maybe.svg)](https://pypi.python.org/pypi/maybe)
-      ![Python versions](https://img.shields.io/pypi/pyversions/maybe.svg)
+      <a href="https://pypi.python.org/pypi/maybe">
+        <img src="https://img.shields.io/pypi/v/maybe.svg">
+      </a>
+      <img src="https://img.shields.io/pypi/pyversions/maybe.svg">
     </td>
   </tr>
   <tr>
-    <td>**Tests**</td>
+    <td><strong>Tests</strong></td>
     <td>
-      [![Build Status](https://travis-ci.org/p-e-w/maybe.svg?branch=master)](https://travis-ci.org/p-e-w/maybe)
+      <a href="https://travis-ci.org/p-e-w/maybe">
+        <img src="https://travis-ci.org/p-e-w/maybe.svg?branch=master">
+      </a>
     </td>
   </tr>
 </table>
