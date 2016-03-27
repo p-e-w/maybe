@@ -14,6 +14,9 @@
       <a href="https://travis-ci.org/p-e-w/maybe">
         <img src="https://travis-ci.org/p-e-w/maybe.svg?branch=master">
       </a>
+      <a href="https://coveralls.io/github/p-e-w/maybe?branch=master">
+        <img src="https://coveralls.io/repos/github/p-e-w/maybe/badge.svg?branch=master">
+      </a>
     </td>
   </tr>
 </table>
