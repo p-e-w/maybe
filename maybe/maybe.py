@@ -47,7 +47,7 @@ for syscall_filter in SYSCALL_FILTERS:
             FILENAME_ARGUMENTS.add(argument[1])
 
 # Turn list into dictionary indexed by syscall name for fast filter retrieval
-SYSCALL_FILTERS = {syscall_filter.name: syscall_filter for syscall_filter in SYSCALL_FILTERS}
+SYSCALL_FILTERS = dict((syscall_filter.name, syscall_filter) for syscall_filter in SYSCALL_FILTERS)
 
 # Prevent python-ptrace from decoding arguments to keep raw numerical values
 SYSCALL_ARG_DICT.clear()
