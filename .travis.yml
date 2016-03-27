@@ -12,7 +12,10 @@ env:
   - TOX_ENV=pypy3
 
 install:
-  - pip install "tox>=2.3.1"
+  - pip install "tox>=2.3.1" "coveralls>=1.1"
 
 script:
   - tox -e $TOX_ENV
+
+after_success:
+  - coveralls
