@@ -1,5 +1,5 @@
 from common import maybe
 
 
-def test_noargs():
-    assert "Error: No command given." in maybe("")
+def test_no_operations():
+    assert maybe("true") == "maybe has not detected any file system operations from true."
