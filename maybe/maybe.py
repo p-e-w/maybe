@@ -148,6 +148,8 @@ def main(argv=sys.argv[1:]):
                "visit https://github.com/p-e-w/maybe.",
     )
     arg_parser.add_argument("command", nargs="+", help="the command to run under maybe's control")
+    arg_parser.add_argument("-l", "--list-only", action="store_true",
+                            help="list operations without header, indentation and rerun prompt")
     arg_parser.add_argument("--version", action="version", version="%(prog)s 0.4.0")
     args = arg_parser.parse_args(argv)
 
@@ -186,18 +188,20 @@ def main(argv=sys.argv[1:]):
         debugger.quit()
 
     if operations:
-        print("%s has prevented %s from performing %d file system operations:\n" %
-              (T.bold("maybe"), T.bold(command), len(operations)))
+        if not args.list_only:
+            print("%s has prevented %s from performing %d file system operations:\n" %
+                  (T.bold("maybe"), T.bold(command), len(operations)))
         for operation in operations:
-            print("  " + operation)
-        try:
-            choice = input("\nDo you want to rerun %s and permit these operations? [y/N] " % T.bold(command))
-        except KeyboardInterrupt:
-            choice = ""
-            # Ctrl+C does not print a newline automatically
-            print("")
-        if choice.lower() == "y":
-            subprocess.call(args.command)
+            print(("" if args.list_only else "  ") + operation)
+        if not args.list_only:
+            try:
+                choice = input("\nDo you want to rerun %s and permit these operations? [y/N] " % T.bold(command))
+            except KeyboardInterrupt:
+                choice = ""
+                # Ctrl+C does not print a newline automatically
+                print("")
+            if choice.lower() == "y":
+                subprocess.call(args.command)
     else:
         print("%s has not detected any file system operations from %s." %
               (T.bold("maybe"), T.bold(command)))
