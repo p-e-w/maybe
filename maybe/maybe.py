@@ -10,6 +10,7 @@
 
 import sys
 import subprocess
+from argparse import ArgumentParser
 from logging import getLogger, NullHandler
 
 from ptrace.tools import locateProgram
@@ -129,20 +130,33 @@ def get_operations(debugger):
     return operations
 
 
-def main(argv=sys.argv):
-    if len(argv) < 2:
-        print(T.red("Error: No command given."))
-        print("Usage: %s COMMAND [ARGUMENT]..." % argv[0])
-        return 1
+def main(argv=sys.argv[1:]):
+    # Insert positional argument separator, if not already present
+    for i, argument in enumerate(argv):
+        if argument == "--":
+            break
+        elif not argument.startswith("-"):
+            argv.insert(i, "--")
+            break
+
+    arg_parser = ArgumentParser(
+        prog="maybe",
+        usage="%(prog)s [options] command [argument ...]",
+        description="Run a command without the ability to make changes to your system " +
+                    "and list the changes it would have made.",
+        epilog="For more information, to report issues or to contribute, " +
+               "visit https://github.com/p-e-w/maybe.",
+    )
+    arg_parser.add_argument("command", nargs="+", help="the command to run under maybe's control")
+    arg_parser.add_argument("--version", action="version", version="%(prog)s 0.4.0")
+    args = arg_parser.parse_args(argv)
 
     # This is basically "shlex.join"
-    command = " ".join([(("'%s'" % arg) if (" " in arg) else arg) for arg in argv[1:]])
-
-    arguments = argv[1:]
-    arguments[0] = locateProgram(arguments[0])
+    command = " ".join([(("'%s'" % arg) if (" " in arg) else arg) for arg in args.command])
 
     try:
-        pid = createChild(arguments, False)
+        args.command[0] = locateProgram(args.command[0])
+        pid = createChild(args.command, False)
     except Exception as error:
         print(T.red("Error executing %s: %s." % (T.bold(command) + T.red, error)))
         return 1
@@ -183,7 +197,7 @@ def main(argv=sys.argv):
             # Ctrl+C does not print a newline automatically
             print("")
         if choice.lower() == "y":
-            subprocess.call(argv[1:])
+            subprocess.call(args.command)
     else:
         print("%s has not detected any file system operations from %s." %
               (T.bold("maybe"), T.bold(command)))
