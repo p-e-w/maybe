@@ -8,12 +8,8 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from blessings import Terminal
 from ptrace.os_tools import RUNNING_LINUX
 from ptrace.cpu_info import CPU_POWERPC, CPU_ARM, CPU_I386, CPU_X86_64
-
-
-T = Terminal()
 
 
 def format_permissions(permissions):

@@ -22,8 +22,9 @@ from ptrace.syscall import SYSCALL_PROTOTYPES, FILENAME_ARGUMENTS
 from ptrace.syscall.posix_constants import SYSCALL_ARG_DICT
 from ptrace.syscall.syscall_argument import ARGUMENT_CALLBACK
 
-from .syscall_filters import SYSCALL_FILTERS
-from .utilities import T, SYSCALL_REGISTER, RETURN_VALUE_REGISTER
+from . import SYSCALL_FILTERS, T
+from .utilities import SYSCALL_REGISTER, RETURN_VALUE_REGISTER
+from .filters import delete, move, change_permissions, change_owner, create_directory, create_link, create_write_file
 
 
 # Python 2/3 compatibility hack
@@ -38,17 +39,21 @@ except NameError:
 getLogger().addHandler(NullHandler())
 
 
-# Register filtered syscalls with python-ptrace so they are parsed correctly
 SYSCALL_PROTOTYPES.clear()
 FILENAME_ARGUMENTS.clear()
-for syscall_filter in SYSCALL_FILTERS:
-    SYSCALL_PROTOTYPES[syscall_filter.name] = syscall_filter.signature
-    for argument in syscall_filter.signature[1]:
-        if argument[0] == "const char *":
-            FILENAME_ARGUMENTS.add(argument[1])
 
-# Turn list into dictionary indexed by syscall name for fast filter retrieval
-SYSCALL_FILTERS = {syscall_filter.name: syscall_filter for syscall_filter in SYSCALL_FILTERS}
+NEW_SYSCALL_FILTERS = {}
+
+for scope_filters in SYSCALL_FILTERS.values():
+    for syscall_filter in scope_filters:
+        NEW_SYSCALL_FILTERS[syscall_filter.name] = syscall_filter
+        # Register filtered syscalls with python-ptrace so they are parsed correctly
+        SYSCALL_PROTOTYPES[syscall_filter.name] = syscall_filter.signature
+        for argument in syscall_filter.signature[1]:
+            if argument[0] == "const char *":
+                FILENAME_ARGUMENTS.add(argument[1])
+
+SYSCALL_FILTERS = NEW_SYSCALL_FILTERS
 
 # Prevent python-ptrace from decoding arguments to keep raw numerical values
 SYSCALL_ARG_DICT.clear()
