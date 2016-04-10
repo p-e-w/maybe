@@ -139,12 +139,11 @@ def get_operations(debugger):
 
 def main(argv=sys.argv[1:]):
     # Insert positional argument separator, if not already present
-    for i, argument in enumerate(argv):
-        if argument == "--":
-            break
-        elif not argument.startswith("-"):
-            argv.insert(i, "--")
-            break
+    if "--" not in argv:
+        for i, argument in enumerate(argv):
+            if not argument.startswith("-"):
+                argv.insert(i, "--")
+                break
 
     arg_parser = ArgumentParser(
         prog="maybe",
