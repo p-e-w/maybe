@@ -24,7 +24,9 @@ from ptrace.syscall.syscall_argument import ARGUMENT_CALLBACK
 
 from . import SYSCALL_FILTERS, T
 from .utilities import SYSCALL_REGISTER, RETURN_VALUE_REGISTER
-from .filters import delete, move, change_permissions, change_owner, create_directory, create_link, create_write_file
+# Filter modules are imported not to use them as symbols, but to execute their top-level code
+from .filters import (delete, move, change_permissions, change_owner,    # noqa
+                      create_directory, create_link, create_write_file)  # noqa
 
 
 # Python 2/3 compatibility hack
