@@ -22,7 +22,7 @@ from ptrace.syscall import SYSCALL_PROTOTYPES, FILENAME_ARGUMENTS
 from ptrace.syscall.posix_constants import SYSCALL_ARG_DICT
 from ptrace.syscall.syscall_argument import ARGUMENT_CALLBACK
 
-from . import SYSCALL_FILTERS, T
+from . import SYSCALL_FILTERS, T, initialize_terminal
 from .utilities import SYSCALL_REGISTER, RETURN_VALUE_REGISTER
 # Filter modules are imported not to use them as symbols, but to execute their top-level code
 from .filters import (delete, move, change_permissions, change_owner,    # noqa
@@ -156,8 +156,13 @@ def main(argv=sys.argv[1:]):
     arg_parser.add_argument("command", nargs="+", help="the command to run under maybe's control")
     arg_parser.add_argument("-l", "--list-only", action="store_true",
                             help="list operations without header, indentation and rerun prompt")
+    arg_parser.add_argument("--style-output", choices=["yes", "no", "auto"], default="auto",
+                            help="colorize output using ANSI escape sequences (yes/no) " +
+                                 "or automatically decide based on whether stdout is a terminal (auto, default)")
     arg_parser.add_argument("--version", action="version", version="%(prog)s 0.4.0")
     args = arg_parser.parse_args(argv)
+
+    initialize_terminal(args.style_output)
 
     # This is basically "shlex.join"
     command = " ".join([(("'%s'" % arg) if (" " in arg) else arg) for arg in args.command])
