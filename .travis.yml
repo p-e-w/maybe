@@ -10,6 +10,7 @@ env:
   - TOX_ENV=py35
   - TOX_ENV=pypy
   - TOX_ENV=pypy3
+  - TOX_ENV=flake8
 
 install:
   - pip install "tox>=2.3.1" "coveralls>=1.1"
