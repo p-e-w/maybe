@@ -62,11 +62,6 @@ SYSCALL_ARG_DICT.clear()
 ARGUMENT_CALLBACK.clear()
 
 
-def prepareProcess(process):
-    process.syscall()
-    process.syscall_state.ignore_callback = lambda syscall: syscall.name not in SYSCALL_FILTERS
-
-
 def parse_argument(argument):
     argument = argument.createText()
     if argument.startswith(("'", '"')):
@@ -86,7 +81,7 @@ format_options = FunctionCallOptions(
 )
 
 
-def get_operations(debugger):
+def get_operations(debugger, args):
     operations = []
 
     while True:
@@ -101,7 +96,7 @@ def get_operations(debugger):
             event.process.syscall(event.signum)
             continue
         except NewProcessEvent as event:
-            prepareProcess(event.process)
+            event.process.syscall()
             event.process.parent.syscall()
             continue
         except ProcessExecution as event:
@@ -117,20 +112,29 @@ def get_operations(debugger):
 
         if syscall and syscall_state.next_event == "exit":
             # Syscall is about to be executed (just switched from "enter" to "exit")
-            syscall_filter = SYSCALL_FILTERS[syscall.name]
+            if syscall.name in SYSCALL_FILTERS:
+                if args.verbose == 1:
+                    print(syscall.format())
+                elif args.verbose == 2:
+                    print(T.bold(syscall.format()))
 
-            arguments = [parse_argument(argument) for argument in syscall.arguments]
+                syscall_filter = SYSCALL_FILTERS[syscall.name]
 
-            operation = syscall_filter.format(arguments)
-            if operation is not None:
-                operations.append(operation)
+                arguments = [parse_argument(argument) for argument in syscall.arguments]
 
-            return_value = syscall_filter.substitute(arguments)
-            if return_value is not None:
-                # Set invalid syscall number to prevent call execution
-                process.setreg(SYSCALL_REGISTER, -1)
-                # Substitute return value to make syscall appear to have succeeded
-                process.setreg(RETURN_VALUE_REGISTER, return_value)
+                operation = syscall_filter.format(arguments)
+                if operation is not None:
+                    operations.append(operation)
+
+                return_value = syscall_filter.substitute(arguments)
+                if return_value is not None:
+                    # Set invalid syscall number to prevent call execution
+                    process.setreg(SYSCALL_REGISTER, -1)
+                    # Substitute return value to make syscall appear to have succeeded
+                    process.setreg(RETURN_VALUE_REGISTER, return_value)
+
+            elif args.verbose == 2:
+                print(syscall.format())
 
         process.syscall()
 
@@ -159,6 +163,9 @@ def main(argv=sys.argv[1:]):
     arg_parser.add_argument("--style-output", choices=["yes", "no", "auto"], default="auto",
                             help="colorize output using ANSI escape sequences (yes/no) " +
                                  "or automatically decide based on whether stdout is a terminal (auto, default)")
+    arg_parser.add_argument("-v", "--verbose", action="count",
+                            help="if specified once, print every filtered syscall. " +
+                                 "if specified twice, print every syscall, highlighting filtered syscalls")
     arg_parser.add_argument("--version", action="version", version="%(prog)s 0.4.0")
     args = arg_parser.parse_args(argv)
 
@@ -183,10 +190,10 @@ def main(argv=sys.argv[1:]):
                        "Syscalls from subprocesses can not be intercepted."))
 
     process = debugger.addProcess(pid, True)
-    prepareProcess(process)
+    process.syscall()
 
     try:
-        operations = get_operations(debugger)
+        operations = get_operations(debugger, args)
     except Exception as error:
         print(T.red("Error tracing process: %s." % error))
         return 1
