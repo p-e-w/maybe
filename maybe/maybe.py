@@ -60,7 +60,7 @@ format_options = FunctionCallOptions(
 )
 
 
-def get_operations(debugger, args, syscall_filters):
+def get_operations(debugger, syscall_filters, verbose):
     operations = []
 
     while True:
@@ -92,9 +92,9 @@ def get_operations(debugger, args, syscall_filters):
         if syscall and syscall_state.next_event == "exit":
             # Syscall is about to be executed (just switched from "enter" to "exit")
             if syscall.name in syscall_filters:
-                if args.verbose == 1:
+                if verbose == 1:
                     print(syscall.format())
-                elif args.verbose == 2:
+                elif verbose == 2:
                     print(T.bold(syscall.format()))
 
                 syscall_filter = syscall_filters[syscall.name]
@@ -112,7 +112,7 @@ def get_operations(debugger, args, syscall_filters):
                     # Substitute return value to make syscall appear to have succeeded
                     process.setreg(RETURN_VALUE_REGISTER, return_value)
 
-            elif args.verbose == 2:
+            elif verbose == 2:
                 print(syscall.format())
 
         process.syscall()
@@ -207,7 +207,7 @@ def main(argv=sys.argv[1:]):
     process.syscall()
 
     try:
-        operations = get_operations(debugger, args, syscall_filters)
+        operations = get_operations(debugger, syscall_filters, args.verbose)
     except Exception as error:
         print(T.red("Error tracing process: %s." % error))
         return 1
