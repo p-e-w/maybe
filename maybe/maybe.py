@@ -41,27 +41,6 @@ except NameError:
 getLogger().addHandler(NullHandler())
 
 
-SYSCALL_PROTOTYPES.clear()
-FILENAME_ARGUMENTS.clear()
-
-NEW_SYSCALL_FILTERS = {}
-
-for scope_filters in SYSCALL_FILTERS.values():
-    for syscall_filter in scope_filters:
-        NEW_SYSCALL_FILTERS[syscall_filter.name] = syscall_filter
-        # Register filtered syscalls with python-ptrace so they are parsed correctly
-        SYSCALL_PROTOTYPES[syscall_filter.name] = syscall_filter.signature
-        for argument in syscall_filter.signature[1]:
-            if argument[0] == "const char *":
-                FILENAME_ARGUMENTS.add(argument[1])
-
-SYSCALL_FILTERS = NEW_SYSCALL_FILTERS
-
-# Prevent python-ptrace from decoding arguments to keep raw numerical values
-SYSCALL_ARG_DICT.clear()
-ARGUMENT_CALLBACK.clear()
-
-
 def parse_argument(argument):
     argument = argument.createText()
     if argument.startswith(("'", '"')):
@@ -81,7 +60,7 @@ format_options = FunctionCallOptions(
 )
 
 
-def get_operations(debugger, args):
+def get_operations(debugger, args, syscall_filters):
     operations = []
 
     while True:
@@ -112,13 +91,13 @@ def get_operations(debugger, args):
 
         if syscall and syscall_state.next_event == "exit":
             # Syscall is about to be executed (just switched from "enter" to "exit")
-            if syscall.name in SYSCALL_FILTERS:
+            if syscall.name in syscall_filters:
                 if args.verbose == 1:
                     print(syscall.format())
                 elif args.verbose == 2:
                     print(T.bold(syscall.format()))
 
-                syscall_filter = SYSCALL_FILTERS[syscall.name]
+                syscall_filter = syscall_filters[syscall.name]
 
                 arguments = [parse_argument(argument) for argument in syscall.arguments]
 
@@ -142,6 +121,8 @@ def get_operations(debugger, args):
 
 
 def main(argv=sys.argv[1:]):
+    filter_scopes = sorted(SYSCALL_FILTERS.keys())
+
     # Insert positional argument separator, if not already present
     if "--" not in argv:
         for i, argument in enumerate(argv):
@@ -158,6 +139,16 @@ def main(argv=sys.argv[1:]):
                "visit https://github.com/p-e-w/maybe.",
     )
     arg_parser.add_argument("command", nargs="+", help="the command to run under maybe's control")
+    arg_group = arg_parser.add_mutually_exclusive_group()
+    arg_group.add_argument("-a", "--allow", nargs="+", choices=filter_scopes, metavar="OPERATION",
+                           help="allow the command to perform the specified operation(s). " +
+                                "all other operations will be denied. " +
+                                "possible values for %(metavar)s are: %(choices)s")
+    arg_group.add_argument("-d", "--deny", nargs="+", choices=filter_scopes, metavar="OPERATION",
+                           help="deny the command the specified operation(s). " +
+                                "all other operations will be allowed. " +
+                                "see --allow for a list of possible values for %(metavar)s. " +
+                                "--allow and --deny cannot be combined")
     arg_parser.add_argument("-l", "--list-only", action="store_true",
                             help="list operations without header, indentation and rerun prompt")
     arg_parser.add_argument("--style-output", choices=["yes", "no", "auto"], default="auto",
@@ -170,6 +161,29 @@ def main(argv=sys.argv[1:]):
     args = arg_parser.parse_args(argv)
 
     initialize_terminal(args.style_output)
+
+    if args.allow is not None:
+        filter_scopes = set(filter_scopes) - set(args.allow)
+    elif args.deny is not None:
+        filter_scopes = args.deny
+
+    SYSCALL_PROTOTYPES.clear()
+    FILENAME_ARGUMENTS.clear()
+
+    syscall_filters = {}
+
+    for filter_scope in filter_scopes:
+        for syscall_filter in SYSCALL_FILTERS[filter_scope]:
+            syscall_filters[syscall_filter.name] = syscall_filter
+            # Register filtered syscalls with python-ptrace so they are parsed correctly
+            SYSCALL_PROTOTYPES[syscall_filter.name] = syscall_filter.signature
+            for argument in syscall_filter.signature[1]:
+                if argument[0] == "const char *":
+                    FILENAME_ARGUMENTS.add(argument[1])
+
+    # Prevent python-ptrace from decoding arguments to keep raw numerical values
+    SYSCALL_ARG_DICT.clear()
+    ARGUMENT_CALLBACK.clear()
 
     # This is basically "shlex.join"
     command = " ".join([(("'%s'" % arg) if (" " in arg) else arg) for arg in args.command])
@@ -193,7 +207,7 @@ def main(argv=sys.argv[1:]):
     process.syscall()
 
     try:
-        operations = get_operations(debugger, args)
+        operations = get_operations(debugger, args, syscall_filters)
     except Exception as error:
         print(T.red("Error tracing process: %s." % error))
         return 1
