@@ -18,7 +18,7 @@ from ptrace.debugger import ProcessSignal, NewProcessEvent, ProcessExecution, Pr
 from ptrace.debugger.child import createChild
 from ptrace.debugger.debugger import PtraceDebugger, DebuggerError
 from ptrace.func_call import FunctionCallOptions
-from ptrace.syscall import SYSCALL_PROTOTYPES, FILENAME_ARGUMENTS
+from ptrace.syscall import SYSCALL_PROTOTYPES, FILENAME_ARGUMENTS, DIRFD_ARGUMENTS
 from ptrace.syscall.posix_constants import SYSCALL_ARG_DICT
 from ptrace.syscall.syscall_argument import ARGUMENT_CALLBACK
 
@@ -182,6 +182,7 @@ def main(argv=sys.argv[1:]):
                     FILENAME_ARGUMENTS.add(argument[1])
 
     # Prevent python-ptrace from decoding arguments to keep raw numerical values
+    DIRFD_ARGUMENTS.clear()
     SYSCALL_ARG_DICT.clear()
     ARGUMENT_CALLBACK.clear()
 
