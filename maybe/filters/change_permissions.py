@@ -11,8 +11,16 @@
 from os.path import abspath
 
 from maybe import SyscallFilter, SYSCALL_FILTERS, T
-from maybe.utilities import format_permissions
 from maybe.filters.create_write_file import get_file_descriptor_path
+
+
+def format_permissions(permissions):
+    result = ""
+    for i in range(2, -1, -1):
+        result += "r" if permissions & (4 * 8**i) else "-"
+        result += "w" if permissions & (2 * 8**i) else "-"
+        result += "x" if permissions & (1 * 8**i) else "-"
+    return result
 
 
 def format_change_permissions(path, permissions):
