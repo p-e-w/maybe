@@ -27,19 +27,14 @@ def format_move(path_old, path_new):
 SYSCALL_FILTERS["move"] = [
     SyscallFilter(
         name="rename",
-        signature=("int", (("const char *", "oldpath"), ("const char *", "newpath"),)),
         format=lambda args: format_move(args[0], args[1]),
     ),
     SyscallFilter(
         name="renameat",
-        signature=("int", (("int", "olddirfd"), ("const char *", "oldpath"),
-                           ("int", "newdirfd"), ("const char *", "newpath"),)),
         format=lambda args: format_move(args[1], args[3]),
     ),
     SyscallFilter(
         name="renameat2",
-        signature=("int", (("int", "olddirfd"), ("const char *", "oldpath"),
-                           ("int", "newdirfd"), ("const char *", "newpath"), ("unsigned int", "flags"),)),
         format=lambda args: format_move(args[1], args[3]),
     ),
 ]

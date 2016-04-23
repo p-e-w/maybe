@@ -18,12 +18,11 @@ from ptrace.debugger import ProcessSignal, NewProcessEvent, ProcessExecution, Pr
 from ptrace.debugger.child import createChild
 from ptrace.debugger.debugger import PtraceDebugger, DebuggerError
 from ptrace.func_call import FunctionCallOptions
-from ptrace.syscall import SYSCALL_PROTOTYPES, FILENAME_ARGUMENTS, DIRFD_ARGUMENTS
+from ptrace.syscall import SYSCALL_REGISTER, RETURN_VALUE_REGISTER, DIRFD_ARGUMENTS
 from ptrace.syscall.posix_constants import SYSCALL_ARG_DICT
 from ptrace.syscall.syscall_argument import ARGUMENT_CALLBACK
 
 from . import SYSCALL_FILTERS, T, initialize_terminal
-from .utilities import SYSCALL_REGISTER, RETURN_VALUE_REGISTER
 # Filter modules are imported not to use them as symbols, but to execute their top-level code
 from .filters import (delete, move, change_permissions, change_owner,    # noqa
                       create_directory, create_link, create_write_file)  # noqa
@@ -167,19 +166,11 @@ def main(argv=sys.argv[1:]):
     elif args.deny is not None:
         filter_scopes = args.deny
 
-    SYSCALL_PROTOTYPES.clear()
-    FILENAME_ARGUMENTS.clear()
-
     syscall_filters = {}
 
     for filter_scope in filter_scopes:
         for syscall_filter in SYSCALL_FILTERS[filter_scope]:
             syscall_filters[syscall_filter.name] = syscall_filter
-            # Register filtered syscalls with python-ptrace so they are parsed correctly
-            SYSCALL_PROTOTYPES[syscall_filter.name] = syscall_filter.signature
-            for argument in syscall_filter.signature[1]:
-                if argument[0] == "const char *":
-                    FILENAME_ARGUMENTS.add(argument[1])
 
     # Prevent python-ptrace from decoding arguments to keep raw numerical values
     DIRFD_ARGUMENTS.clear()

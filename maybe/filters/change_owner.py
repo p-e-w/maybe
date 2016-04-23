@@ -32,23 +32,18 @@ def format_change_owner(path, owner, group):
 SYSCALL_FILTERS["change_owner"] = [
     SyscallFilter(
         name="chown",
-        signature=("int", (("const char *", "pathname"), ("uid_t", "owner"), ("gid_t", "group"),)),
         format=lambda args: format_change_owner(args[0], args[1], args[2]),
     ),
     SyscallFilter(
         name="fchown",
-        signature=("int", (("int", "fd"), ("uid_t", "owner"), ("gid_t", "group"),)),
         format=lambda args: format_change_owner(get_file_descriptor_path(args[0]), args[1], args[2]),
     ),
     SyscallFilter(
         name="lchown",
-        signature=("int", (("const char *", "pathname"), ("uid_t", "owner"), ("gid_t", "group"),)),
         format=lambda args: format_change_owner(args[0], args[1], args[2]),
     ),
     SyscallFilter(
         name="fchownat",
-        signature=("int", (("int", "dirfd"), ("const char *", "pathname"),
-                           ("uid_t", "owner"), ("gid_t", "group"), ("int", "flags"),)),
         format=lambda args: format_change_owner(args[1], args[2], args[3]),
     ),
 ]

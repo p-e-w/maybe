@@ -108,90 +108,73 @@ def substitute_dup(file_descriptor_old, file_descriptor_new=None):
 SYSCALL_FILTERS["create_write_file"] = [
     SyscallFilter(
         name="open",
-        # TODO: "open" is overloaded (a version with 3 arguments also exists). Are both handled properly?
-        signature=("int", (("const char *", "pathname"), ("int", "flags"),)),
         format=lambda args: format_open(args[0], args[1]),
         substitute=lambda args: substitute_open(args[0], args[1]),
     ),
     SyscallFilter(
         name="creat",
-        signature=("int", (("const char *", "pathname"), ("mode_t", "mode"),)),
         format=lambda args: format_open(args[0], O_CREAT | O_WRONLY | O_TRUNC),
         substitute=lambda args: substitute_open(args[0], O_CREAT | O_WRONLY | O_TRUNC),
     ),
     SyscallFilter(
         name="openat",
-        # TODO: "openat" is overloaded (see above)
-        signature=("int", (("int", "dirfd"), ("const char *", "pathname"), ("int", "flags"),)),
         format=lambda args: format_open(args[1], args[2]),
         substitute=lambda args: substitute_open(args[1], args[2]),
     ),
     SyscallFilter(
         name="mknod",
-        signature=("int", (("const char *", "pathname"), ("mode_t", "mode"),)),
         format=lambda args: format_mknod(args[0], args[1]),
         substitute=lambda args: substitute_mknod(args[0], args[1]),
     ),
     SyscallFilter(
         name="mknodat",
-        signature=("int", (("int", "dirfd"), ("const char *", "pathname"), ("mode_t", "mode"),)),
         format=lambda args: format_mknod(args[1], args[2]),
         substitute=lambda args: substitute_mknod(args[1], args[2]),
     ),
     SyscallFilter(
         name="mkfifo",
-        signature=("int", (("const char *", "pathname"), ("mode_t", "mode"),)),
         format=lambda args: format_mknod(args[0], S_IFIFO),
         substitute=lambda args: substitute_mknod(args[0], S_IFIFO),
     ),
     SyscallFilter(
         name="mkfifoat",
-        signature=("int", (("int", "dirfd"), ("const char *", "pathname"), ("mode_t", "mode"),)),
         format=lambda args: format_mknod(args[1], S_IFIFO),
         substitute=lambda args: substitute_mknod(args[1], S_IFIFO),
     ),
     SyscallFilter(
         name="write",
-        signature=("ssize_t", (("int", "fd"), ("const void *", "buf"), ("size_t", "count"),)),
         format=lambda args: format_write(args[0], args[2]),
         substitute=lambda args: substitute_write(args[0], args[2]),
     ),
     SyscallFilter(
         name="pwrite",
-        signature=("ssize_t", (("int", "fd"), ("const void *", "buf"), ("size_t", "count"), ("off_t", "offset"),)),
         format=lambda args: format_write(args[0], args[2]),
         substitute=lambda args: substitute_write(args[0], args[2]),
     ),
     SyscallFilter(
         name="writev",
-        signature=("ssize_t", (("int", "fd"), ("const struct iovec *", "iov"), ("int", "iovcnt"),)),
         # TODO: Actual byte count is iovcnt * iov.iov_len
         format=lambda args: format_write(args[0], args[2]),
         substitute=lambda args: substitute_write(args[0], args[2]),
     ),
     SyscallFilter(
         name="pwritev",
-        signature=("ssize_t", (("int", "fd"), ("const struct iovec *", "iov"),
-                               ("int", "iovcnt"), ("off_t", "offset"),)),
         # TODO: Actual byte count is iovcnt * iov.iov_len
         format=lambda args: format_write(args[0], args[2]),
         substitute=lambda args: substitute_write(args[0], args[2]),
     ),
     SyscallFilter(
         name="dup",
-        signature=("int", (("int", "oldfd"),)),
         format=lambda args: None,
         substitute=lambda args: substitute_dup(args[0]),
     ),
     SyscallFilter(
         name="dup2",
-        signature=("int", (("int", "oldfd"), ("int", "newfd"),)),
         format=lambda args: None,
         substitute=lambda args: substitute_dup(args[0], args[1]),
     ),
     SyscallFilter(
         name="dup3",
-        signature=("int", (("int", "oldfd"), ("int", "newfd"), ("int", "flags"),)),
         format=lambda args: None,
         substitute=lambda args: substitute_dup(args[0], args[1]),
     ),

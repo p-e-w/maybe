@@ -21,23 +21,18 @@ def format_create_link(path_source, path_target, symbolic):
 SYSCALL_FILTERS["create_link"] = [
     SyscallFilter(
         name="link",
-        signature=("int", (("const char *", "oldpath"), ("const char *", "newpath"),)),
         format=lambda args: format_create_link(args[1], args[0], False),
     ),
     SyscallFilter(
         name="linkat",
-        signature=("int", (("int", "olddirfd"), ("const char *", "oldpath"),
-                           ("int", "newdirfd"), ("const char *", "newpath"), ("int", "flags"),)),
         format=lambda args: format_create_link(args[3], args[1], False),
     ),
     SyscallFilter(
         name="symlink",
-        signature=("int", (("const char *", "target"), ("const char *", "linkpath"),)),
         format=lambda args: format_create_link(args[1], args[0], True),
     ),
     SyscallFilter(
         name="symlinkat",
-        signature=("int", (("const char *", "target"), ("int", "newdirfd"), ("const char *", "linkpath"),)),
         format=lambda args: format_create_link(args[2], args[0], True),
     ),
 ]

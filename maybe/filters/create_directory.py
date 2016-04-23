@@ -20,12 +20,10 @@ def format_create_directory(path):
 SYSCALL_FILTERS["create_directory"] = [
     SyscallFilter(
         name="mkdir",
-        signature=("int", (("const char *", "pathname"), ("mode_t", "mode"),)),
         format=lambda args: format_create_directory(args[0]),
     ),
     SyscallFilter(
         name="mkdirat",
-        signature=("int", (("int", "dirfd"), ("const char *", "pathname"), ("mode_t", "mode"),)),
         format=lambda args: format_create_directory(args[1]),
     ),
 ]

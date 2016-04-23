@@ -20,17 +20,14 @@ def format_delete(path):
 SYSCALL_FILTERS["delete"] = [
     SyscallFilter(
         name="unlink",
-        signature=("int", (("const char *", "pathname"),)),
         format=lambda args: format_delete(args[0]),
     ),
     SyscallFilter(
         name="unlinkat",
-        signature=("int", (("int", "dirfd"), ("const char *", "pathname"), ("int", "flags"),)),
         format=lambda args: format_delete(args[1]),
     ),
     SyscallFilter(
         name="rmdir",
-        signature=("int", (("const char *", "pathname"),)),
         format=lambda args: format_delete(args[0]),
     ),
 ]
