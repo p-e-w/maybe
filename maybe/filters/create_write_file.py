@@ -132,16 +132,6 @@ SYSCALL_FILTERS["create_write_file"] = [
         substitute=lambda args: substitute_mknod(args[1], args[2]),
     ),
     SyscallFilter(
-        name="mkfifo",
-        format=lambda args: format_mknod(args[0], S_IFIFO),
-        substitute=lambda args: substitute_mknod(args[0], S_IFIFO),
-    ),
-    SyscallFilter(
-        name="mkfifoat",
-        format=lambda args: format_mknod(args[1], S_IFIFO),
-        substitute=lambda args: substitute_mknod(args[1], S_IFIFO),
-    ),
-    SyscallFilter(
         name="write",
         format=lambda args: format_write(args[0], args[2]),
         substitute=lambda args: substitute_write(args[0], args[2]),
