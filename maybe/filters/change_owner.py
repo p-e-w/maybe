@@ -31,19 +31,19 @@ def format_change_owner(path, owner, group):
 
 SYSCALL_FILTERS["change_owner"] = [
     SyscallFilter(
-        name="chown",
+        syscall="chown",
         format=lambda args: format_change_owner(args[0], args[1], args[2]),
     ),
     SyscallFilter(
-        name="fchown",
+        syscall="fchown",
         format=lambda args: format_change_owner(get_file_descriptor_path(args[0]), args[1], args[2]),
     ),
     SyscallFilter(
-        name="lchown",
+        syscall="lchown",
         format=lambda args: format_change_owner(args[0], args[1], args[2]),
     ),
     SyscallFilter(
-        name="fchownat",
+        syscall="fchownat",
         format=lambda args: format_change_owner(args[1], args[2], args[3]),
     ),
 ]

@@ -170,7 +170,7 @@ def main(argv=sys.argv[1:]):
 
     for filter_scope in filter_scopes:
         for syscall_filter in SYSCALL_FILTERS[filter_scope]:
-            syscall_filters[syscall_filter.name] = syscall_filter
+            syscall_filters[syscall_filter.syscall] = syscall_filter
 
     # Prevent python-ptrace from decoding arguments to keep raw numerical values
     DIRFD_ARGUMENTS.clear()

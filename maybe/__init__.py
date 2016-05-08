@@ -13,7 +13,7 @@ from collections import namedtuple
 from blessings import Terminal
 
 
-SyscallFilter = namedtuple("SyscallFilter", ["name", "format", "substitute"])
+SyscallFilter = namedtuple("SyscallFilter", ["syscall", "format", "substitute"])
 # Make returning zero the default substitute function
 # Source: http://stackoverflow.com/a/18348004
 SyscallFilter.__new__.__defaults__ = (lambda args: 0,)
