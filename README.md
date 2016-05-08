@@ -17,6 +17,9 @@
       <a href="https://coveralls.io/github/p-e-w/maybe?branch=master">
         <img src="https://coveralls.io/repos/github/p-e-w/maybe/badge.svg?branch=master">
       </a>
+      <a href="https://gemnasium.com/github.com/p-e-w/maybe">
+        <img src="https://gemnasium.com/badges/github.com/p-e-w/maybe.svg">
+      </a>
     </td>
   </tr>
 </table>
