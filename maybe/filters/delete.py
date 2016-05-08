@@ -20,14 +20,14 @@ def format_delete(path):
 SYSCALL_FILTERS["delete"] = [
     SyscallFilter(
         syscall="unlink",
-        format=lambda args: format_delete(args[0]),
+        format=lambda pid, args: format_delete(args[0]),
     ),
     SyscallFilter(
         syscall="unlinkat",
-        format=lambda args: format_delete(args[1]),
+        format=lambda pid, args: format_delete(args[1]),
     ),
     SyscallFilter(
         syscall="rmdir",
-        format=lambda args: format_delete(args[0]),
+        format=lambda pid, args: format_delete(args[0]),
     ),
 ]

@@ -27,14 +27,14 @@ def format_move(path_old, path_new):
 SYSCALL_FILTERS["move"] = [
     SyscallFilter(
         syscall="rename",
-        format=lambda args: format_move(args[0], args[1]),
+        format=lambda pid, args: format_move(args[0], args[1]),
     ),
     SyscallFilter(
         syscall="renameat",
-        format=lambda args: format_move(args[1], args[3]),
+        format=lambda pid, args: format_move(args[1], args[3]),
     ),
     SyscallFilter(
         syscall="renameat2",
-        format=lambda args: format_move(args[1], args[3]),
+        format=lambda pid, args: format_move(args[1], args[3]),
     ),
 ]

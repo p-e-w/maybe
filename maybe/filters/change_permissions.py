@@ -31,14 +31,14 @@ def format_change_permissions(path, permissions):
 SYSCALL_FILTERS["change_permissions"] = [
     SyscallFilter(
         syscall="chmod",
-        format=lambda args: format_change_permissions(args[0], args[1]),
+        format=lambda pid, args: format_change_permissions(args[0], args[1]),
     ),
     SyscallFilter(
         syscall="fchmod",
-        format=lambda args: format_change_permissions(get_file_descriptor_path(args[0]), args[1]),
+        format=lambda pid, args: format_change_permissions(get_file_descriptor_path(args[0]), args[1]),
     ),
     SyscallFilter(
         syscall="fchmodat",
-        format=lambda args: format_change_permissions(args[1], args[2]),
+        format=lambda pid, args: format_change_permissions(args[1], args[2]),
     ),
 ]

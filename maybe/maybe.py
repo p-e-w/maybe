@@ -100,11 +100,11 @@ def get_operations(debugger, syscall_filters, verbose):
 
                 arguments = [parse_argument(argument) for argument in syscall.arguments]
 
-                operation = syscall_filter.format(arguments)
+                operation = syscall_filter.format(process.pid, arguments)
                 if operation is not None:
                     operations.append(operation)
 
-                return_value = syscall_filter.substitute(arguments)
+                return_value = syscall_filter.substitute(process.pid, arguments)
                 if return_value is not None:
                     # Set invalid syscall number to prevent call execution
                     process.setreg(SYSCALL_REGISTER, -1)

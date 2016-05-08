@@ -108,64 +108,64 @@ def substitute_dup(file_descriptor_old, file_descriptor_new=None):
 SYSCALL_FILTERS["create_write_file"] = [
     SyscallFilter(
         syscall="open",
-        format=lambda args: format_open(args[0], args[1]),
-        substitute=lambda args: substitute_open(args[0], args[1]),
+        format=lambda pid, args: format_open(args[0], args[1]),
+        substitute=lambda pid, args: substitute_open(args[0], args[1]),
     ),
     SyscallFilter(
         syscall="creat",
-        format=lambda args: format_open(args[0], O_CREAT | O_WRONLY | O_TRUNC),
-        substitute=lambda args: substitute_open(args[0], O_CREAT | O_WRONLY | O_TRUNC),
+        format=lambda pid, args: format_open(args[0], O_CREAT | O_WRONLY | O_TRUNC),
+        substitute=lambda pid, args: substitute_open(args[0], O_CREAT | O_WRONLY | O_TRUNC),
     ),
     SyscallFilter(
         syscall="openat",
-        format=lambda args: format_open(args[1], args[2]),
-        substitute=lambda args: substitute_open(args[1], args[2]),
+        format=lambda pid, args: format_open(args[1], args[2]),
+        substitute=lambda pid, args: substitute_open(args[1], args[2]),
     ),
     SyscallFilter(
         syscall="mknod",
-        format=lambda args: format_mknod(args[0], args[1]),
-        substitute=lambda args: substitute_mknod(args[0], args[1]),
+        format=lambda pid, args: format_mknod(args[0], args[1]),
+        substitute=lambda pid, args: substitute_mknod(args[0], args[1]),
     ),
     SyscallFilter(
         syscall="mknodat",
-        format=lambda args: format_mknod(args[1], args[2]),
-        substitute=lambda args: substitute_mknod(args[1], args[2]),
+        format=lambda pid, args: format_mknod(args[1], args[2]),
+        substitute=lambda pid, args: substitute_mknod(args[1], args[2]),
     ),
     SyscallFilter(
         syscall="write",
-        format=lambda args: format_write(args[0], args[2]),
-        substitute=lambda args: substitute_write(args[0], args[2]),
+        format=lambda pid, args: format_write(args[0], args[2]),
+        substitute=lambda pid, args: substitute_write(args[0], args[2]),
     ),
     SyscallFilter(
         syscall="pwrite",
-        format=lambda args: format_write(args[0], args[2]),
-        substitute=lambda args: substitute_write(args[0], args[2]),
+        format=lambda pid, args: format_write(args[0], args[2]),
+        substitute=lambda pid, args: substitute_write(args[0], args[2]),
     ),
     SyscallFilter(
         syscall="writev",
         # TODO: Actual byte count is iovcnt * iov.iov_len
-        format=lambda args: format_write(args[0], args[2]),
-        substitute=lambda args: substitute_write(args[0], args[2]),
+        format=lambda pid, args: format_write(args[0], args[2]),
+        substitute=lambda pid, args: substitute_write(args[0], args[2]),
     ),
     SyscallFilter(
         syscall="pwritev",
         # TODO: Actual byte count is iovcnt * iov.iov_len
-        format=lambda args: format_write(args[0], args[2]),
-        substitute=lambda args: substitute_write(args[0], args[2]),
+        format=lambda pid, args: format_write(args[0], args[2]),
+        substitute=lambda pid, args: substitute_write(args[0], args[2]),
     ),
     SyscallFilter(
         syscall="dup",
-        format=lambda args: None,
-        substitute=lambda args: substitute_dup(args[0]),
+        format=lambda pid, args: None,
+        substitute=lambda pid, args: substitute_dup(args[0]),
     ),
     SyscallFilter(
         syscall="dup2",
-        format=lambda args: None,
-        substitute=lambda args: substitute_dup(args[0], args[1]),
+        format=lambda pid, args: None,
+        substitute=lambda pid, args: substitute_dup(args[0], args[1]),
     ),
     SyscallFilter(
         syscall="dup3",
-        format=lambda args: None,
-        substitute=lambda args: substitute_dup(args[0], args[1]),
+        format=lambda pid, args: None,
+        substitute=lambda pid, args: substitute_dup(args[0], args[1]),
     ),
 ]

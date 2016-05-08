@@ -21,18 +21,18 @@ def format_create_link(path_source, path_target, symbolic):
 SYSCALL_FILTERS["create_link"] = [
     SyscallFilter(
         syscall="link",
-        format=lambda args: format_create_link(args[1], args[0], False),
+        format=lambda pid, args: format_create_link(args[1], args[0], False),
     ),
     SyscallFilter(
         syscall="linkat",
-        format=lambda args: format_create_link(args[3], args[1], False),
+        format=lambda pid, args: format_create_link(args[3], args[1], False),
     ),
     SyscallFilter(
         syscall="symlink",
-        format=lambda args: format_create_link(args[1], args[0], True),
+        format=lambda pid, args: format_create_link(args[1], args[0], True),
     ),
     SyscallFilter(
         syscall="symlinkat",
-        format=lambda args: format_create_link(args[2], args[0], True),
+        format=lambda pid, args: format_create_link(args[2], args[0], True),
     ),
 ]

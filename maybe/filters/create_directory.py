@@ -20,10 +20,10 @@ def format_create_directory(path):
 SYSCALL_FILTERS["create_directory"] = [
     SyscallFilter(
         syscall="mkdir",
-        format=lambda args: format_create_directory(args[0]),
+        format=lambda pid, args: format_create_directory(args[0]),
     ),
     SyscallFilter(
         syscall="mkdirat",
-        format=lambda args: format_create_directory(args[1]),
+        format=lambda pid, args: format_create_directory(args[1]),
     ),
 ]
