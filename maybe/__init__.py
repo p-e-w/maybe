@@ -8,9 +8,12 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
+from os import readlink
+from os.path import join
 from collections import namedtuple
 
 from blessings import Terminal
+from ptrace.syscall.posix_arg import AT_FDCWD
 
 
 SyscallFilter = namedtuple("SyscallFilter", ["syscall", "format", "substitute"])
@@ -38,3 +41,15 @@ def initialize_terminal(style_output):
         "no": None,
         "auto": False,
     }[style_output])
+
+
+# Implements the path resolution logic of the "*at" syscalls
+def get_full_path(pid, path, directory_descriptor=AT_FDCWD):
+    if directory_descriptor == AT_FDCWD:
+        # Current working directory
+        directory = readlink("/proc/%d/cwd" % pid)
+    else:
+        # Directory referred to by directory_descriptor
+        directory = readlink("/proc/%d/fd/%d" % (pid, directory_descriptor))
+    # Note that join will discard directory if path is absolute, as desired
+    return join(directory, path)

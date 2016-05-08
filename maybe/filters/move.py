@@ -8,14 +8,12 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from os.path import abspath, dirname, basename
+from os.path import dirname, basename
 
-from maybe import SyscallFilter, SYSCALL_FILTERS, T
+from maybe import SyscallFilter, SYSCALL_FILTERS, T, get_full_path
 
 
 def format_move(path_old, path_new):
-    path_old = abspath(path_old)
-    path_new = abspath(path_new)
     if dirname(path_old) == dirname(path_new):
         label = "rename"
         path_new = basename(path_new)
@@ -27,14 +25,17 @@ def format_move(path_old, path_new):
 SYSCALL_FILTERS["move"] = [
     SyscallFilter(
         syscall="rename",
-        format=lambda pid, args: format_move(args[0], args[1]),
+        format=lambda pid, args: format_move(get_full_path(pid, args[0]),
+                                             get_full_path(pid, args[1])),
     ),
     SyscallFilter(
         syscall="renameat",
-        format=lambda pid, args: format_move(args[1], args[3]),
+        format=lambda pid, args: format_move(get_full_path(pid, args[1], args[0]),
+                                             get_full_path(pid, args[3], args[2])),
     ),
     SyscallFilter(
         syscall="renameat2",
-        format=lambda pid, args: format_move(args[1], args[3]),
+        format=lambda pid, args: format_move(get_full_path(pid, args[1], args[0]),
+                                             get_full_path(pid, args[3], args[2])),
     ),
 ]

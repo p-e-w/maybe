@@ -8,22 +8,20 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from os.path import abspath
-
-from maybe import SyscallFilter, SYSCALL_FILTERS, T
+from maybe import SyscallFilter, SYSCALL_FILTERS, T, get_full_path
 
 
 def format_create_directory(path):
-    return "%s %s" % (T.cyan("create directory"), T.underline(abspath(path)))
+    return "%s %s" % (T.cyan("create directory"), T.underline(path))
 
 
 SYSCALL_FILTERS["create_directory"] = [
     SyscallFilter(
         syscall="mkdir",
-        format=lambda pid, args: format_create_directory(args[0]),
+        format=lambda pid, args: format_create_directory(get_full_path(pid, args[0])),
     ),
     SyscallFilter(
         syscall="mkdirat",
-        format=lambda pid, args: format_create_directory(args[1]),
+        format=lambda pid, args: format_create_directory(get_full_path(pid, args[1], args[0])),
     ),
 ]

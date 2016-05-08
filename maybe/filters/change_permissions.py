@@ -8,9 +8,7 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from os.path import abspath
-
-from maybe import SyscallFilter, SYSCALL_FILTERS, T
+from maybe import SyscallFilter, SYSCALL_FILTERS, T, get_full_path
 from maybe.filters.create_write_file import get_file_descriptor_path
 
 
@@ -24,14 +22,14 @@ def format_permissions(permissions):
 
 
 def format_change_permissions(path, permissions):
-    return "%s of %s to %s" % (T.yellow("change permissions"), T.underline(abspath(path)),
+    return "%s of %s to %s" % (T.yellow("change permissions"), T.underline(path),
                                T.bold(format_permissions(permissions)))
 
 
 SYSCALL_FILTERS["change_permissions"] = [
     SyscallFilter(
         syscall="chmod",
-        format=lambda pid, args: format_change_permissions(args[0], args[1]),
+        format=lambda pid, args: format_change_permissions(get_full_path(pid, args[0]), args[1]),
     ),
     SyscallFilter(
         syscall="fchmod",
@@ -39,6 +37,6 @@ SYSCALL_FILTERS["change_permissions"] = [
     ),
     SyscallFilter(
         syscall="fchmodat",
-        format=lambda pid, args: format_change_permissions(args[1], args[2]),
+        format=lambda pid, args: format_change_permissions(get_full_path(pid, args[1], args[0]), args[2]),
     ),
 ]

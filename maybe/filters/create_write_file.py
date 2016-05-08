@@ -8,11 +8,11 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from os.path import abspath, exists
+from os.path import exists
 from os import O_WRONLY, O_RDWR, O_APPEND, O_CREAT, O_TRUNC
 from stat import S_IFCHR, S_IFBLK, S_IFIFO, S_IFSOCK
 
-from maybe import SyscallFilter, SYSCALL_FILTERS, T
+from maybe import SyscallFilter, SYSCALL_FILTERS, T, get_full_path
 
 
 # Start with a large number to avoid collisions with other FDs
@@ -36,7 +36,6 @@ allowed_files = set(["/dev/null", "/dev/zero", "/dev/tty"])
 
 
 def format_open(path, flags):
-    path = abspath(path)
     if path in allowed_files:
         return None
     elif (flags & O_CREAT) and not exists(path):
@@ -48,7 +47,6 @@ def format_open(path, flags):
 
 
 def substitute_open(path, flags):
-    path = abspath(path)
     if path in allowed_files:
         return None
     elif (flags & O_WRONLY) or (flags & O_RDWR) or (flags & O_APPEND) or (format_open(path, flags) is not None):
@@ -61,7 +59,6 @@ def substitute_open(path, flags):
 
 
 def format_mknod(path, type):
-    path = abspath(path)
     if exists(path):
         return None
     elif (type & S_IFCHR):
@@ -108,28 +105,28 @@ def substitute_dup(file_descriptor_old, file_descriptor_new=None):
 SYSCALL_FILTERS["create_write_file"] = [
     SyscallFilter(
         syscall="open",
-        format=lambda pid, args: format_open(args[0], args[1]),
-        substitute=lambda pid, args: substitute_open(args[0], args[1]),
+        format=lambda pid, args: format_open(get_full_path(pid, args[0]), args[1]),
+        substitute=lambda pid, args: substitute_open(get_full_path(pid, args[0]), args[1]),
     ),
     SyscallFilter(
         syscall="creat",
-        format=lambda pid, args: format_open(args[0], O_CREAT | O_WRONLY | O_TRUNC),
-        substitute=lambda pid, args: substitute_open(args[0], O_CREAT | O_WRONLY | O_TRUNC),
+        format=lambda pid, args: format_open(get_full_path(pid, args[0]), O_CREAT | O_WRONLY | O_TRUNC),
+        substitute=lambda pid, args: substitute_open(get_full_path(pid, args[0]), O_CREAT | O_WRONLY | O_TRUNC),
     ),
     SyscallFilter(
         syscall="openat",
-        format=lambda pid, args: format_open(args[1], args[2]),
-        substitute=lambda pid, args: substitute_open(args[1], args[2]),
+        format=lambda pid, args: format_open(get_full_path(pid, args[1], args[0]), args[2]),
+        substitute=lambda pid, args: substitute_open(get_full_path(pid, args[1], args[0]), args[2]),
     ),
     SyscallFilter(
         syscall="mknod",
-        format=lambda pid, args: format_mknod(args[0], args[1]),
-        substitute=lambda pid, args: substitute_mknod(args[0], args[1]),
+        format=lambda pid, args: format_mknod(get_full_path(pid, args[0]), args[1]),
+        substitute=lambda pid, args: substitute_mknod(get_full_path(pid, args[0]), args[1]),
     ),
     SyscallFilter(
         syscall="mknodat",
-        format=lambda pid, args: format_mknod(args[1], args[2]),
-        substitute=lambda pid, args: substitute_mknod(args[1], args[2]),
+        format=lambda pid, args: format_mknod(get_full_path(pid, args[1], args[0]), args[2]),
+        substitute=lambda pid, args: substitute_mknod(get_full_path(pid, args[1], args[0]), args[2]),
     ),
     SyscallFilter(
         syscall="write",
