@@ -16,7 +16,7 @@ from logging import getLogger, NullHandler
 from ptrace.tools import locateProgram
 from ptrace.debugger import ProcessSignal, NewProcessEvent, ProcessExecution, ProcessExit
 from ptrace.debugger.child import createChild
-from ptrace.debugger.debugger import PtraceDebugger, DebuggerError
+from ptrace.debugger.debugger import PtraceDebugger
 from ptrace.func_call import FunctionCallOptions
 from ptrace.syscall import SYSCALL_REGISTER, RETURN_VALUE_REGISTER, DIRFD_ARGUMENTS
 from ptrace.syscall.posix_constants import SYSCALL_ARG_DICT
@@ -188,12 +188,8 @@ def main(argv=sys.argv[1:]):
         return 1
 
     debugger = PtraceDebugger()
+    debugger.traceFork()
     debugger.traceExec()
-    try:
-        debugger.traceFork()
-    except DebuggerError:
-        print(T.yellow("Warning: Running without traceFork support. " +
-                       "Syscalls from subprocesses can not be intercepted."))
 
     process = debugger.addProcess(pid, True)
     process.syscall()

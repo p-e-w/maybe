@@ -5,6 +5,7 @@
       <a href="https://pypi.python.org/pypi/maybe">
         <img src="https://img.shields.io/pypi/v/maybe.svg">
       </a>
+      <img src="https://img.shields.io/badge/os-linux-blue.svg">
       <img src="https://img.shields.io/pypi/pyversions/maybe.svg">
     </td>
   </tr>
@@ -55,7 +56,7 @@ Currently, `maybe` is best thought of as an (alpha-quality) "what exactly will t
 
 ## Installation
 
-`maybe` requires [Python](https://www.python.org/) 2.7+/3.3+ :snake:. If you have the [pip](https://pip.pypa.io) package manager, all you need to do is run
+`maybe` runs on Linux :penguin: and requires [Python](https://www.python.org/) 2.7+/3.3+ :snake:. If you have the [pip](https://pip.pypa.io) package manager, all you need to do is run
 
 ```
 pip install maybe
@@ -68,14 +69,6 @@ pip install -e .
 ```
 
 in its main directory to install the package in editable mode.
-
-### Operating system support
-
-| OS | Support status |
-| --- | --- |
-| Linux | :white_check_mark: Full support |
-| FreeBSD / OpenBSD | :ballot_box_with_check: Limited support (subprocesses can not be intercepted) |
-| OS X | :question: Might be supported in future pending OS X support in python-ptrace |
 
 
 ## Usage
