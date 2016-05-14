@@ -11,8 +11,7 @@
 from pwd import getpwuid
 from grp import getgrgid
 
-from maybe import SyscallFilter, SYSCALL_FILTERS, T, get_full_path
-from maybe.filters.create_write_file import get_file_descriptor_path
+from maybe import SyscallFilter, SYSCALL_FILTERS, T, descriptor_path, full_path
 
 
 def format_change_owner(path, owner, group):
@@ -31,18 +30,18 @@ def format_change_owner(path, owner, group):
 SYSCALL_FILTERS["change_owner"] = [
     SyscallFilter(
         syscall="chown",
-        format=lambda pid, args: format_change_owner(get_full_path(pid, args[0]), args[1], args[2]),
+        format=lambda pid, args: format_change_owner(full_path(pid, args[0]), args[1], args[2]),
     ),
     SyscallFilter(
         syscall="fchown",
-        format=lambda pid, args: format_change_owner(get_file_descriptor_path(args[0]), args[1], args[2]),
+        format=lambda pid, args: format_change_owner(descriptor_path(pid, args[0]), args[1], args[2]),
     ),
     SyscallFilter(
         syscall="lchown",
-        format=lambda pid, args: format_change_owner(get_full_path(pid, args[0]), args[1], args[2]),
+        format=lambda pid, args: format_change_owner(full_path(pid, args[0]), args[1], args[2]),
     ),
     SyscallFilter(
         syscall="fchownat",
-        format=lambda pid, args: format_change_owner(get_full_path(pid, args[1], args[0]), args[2], args[3]),
+        format=lambda pid, args: format_change_owner(full_path(pid, args[1], args[0]), args[2], args[3]),
     ),
 ]

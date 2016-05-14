@@ -10,7 +10,7 @@
 
 from os.path import dirname, basename
 
-from maybe import SyscallFilter, SYSCALL_FILTERS, T, get_full_path
+from maybe import SyscallFilter, SYSCALL_FILTERS, T, full_path
 
 
 def format_move(path_old, path_new):
@@ -25,17 +25,17 @@ def format_move(path_old, path_new):
 SYSCALL_FILTERS["move"] = [
     SyscallFilter(
         syscall="rename",
-        format=lambda pid, args: format_move(get_full_path(pid, args[0]),
-                                             get_full_path(pid, args[1])),
+        format=lambda pid, args: format_move(full_path(pid, args[0]),
+                                             full_path(pid, args[1])),
     ),
     SyscallFilter(
         syscall="renameat",
-        format=lambda pid, args: format_move(get_full_path(pid, args[1], args[0]),
-                                             get_full_path(pid, args[3], args[2])),
+        format=lambda pid, args: format_move(full_path(pid, args[1], args[0]),
+                                             full_path(pid, args[3], args[2])),
     ),
     SyscallFilter(
         syscall="renameat2",
-        format=lambda pid, args: format_move(get_full_path(pid, args[1], args[0]),
-                                             get_full_path(pid, args[3], args[2])),
+        format=lambda pid, args: format_move(full_path(pid, args[1], args[0]),
+                                             full_path(pid, args[3], args[2])),
     ),
 ]
