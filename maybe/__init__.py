@@ -10,19 +10,9 @@
 
 from os import readlink
 from os.path import join
-from collections import namedtuple
 
 from blessings import Terminal
 from ptrace.syscall.posix_arg import AT_FDCWD
-
-
-SyscallFilter = namedtuple("SyscallFilter", ["syscall", "format", "substitute"])
-# Make returning zero the default substitute function
-# Source: http://stackoverflow.com/a/18348004
-SyscallFilter.__new__.__defaults__ = (lambda pid, args: 0,)
-
-
-SYSCALL_FILTERS = {}
 
 
 T = Terminal()
@@ -41,6 +31,15 @@ def initialize_terminal(style_output):
         "no": None,
         "auto": False,
     }[style_output])
+
+
+SYSCALL_FILTERS = {}
+
+
+def register_filter(filter_scope, syscall, filter_function):
+    if filter_scope not in SYSCALL_FILTERS:
+        SYSCALL_FILTERS[filter_scope] = {}
+    SYSCALL_FILTERS[filter_scope][syscall] = filter_function
 
 
 # Start with a large number to avoid collisions with other FDs

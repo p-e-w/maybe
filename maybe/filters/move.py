@@ -10,32 +10,23 @@
 
 from os.path import dirname, basename
 
-from maybe import SyscallFilter, SYSCALL_FILTERS, T, full_path
+from maybe import T, register_filter, full_path
 
 
-def format_move(path_old, path_new):
+def filter_move(path_old, path_new):
     if dirname(path_old) == dirname(path_new):
         label = "rename"
         path_new = basename(path_new)
     else:
         label = "move"
-    return "%s %s to %s" % (T.green(label), T.underline(path_old), T.underline(path_new))
+    return "%s %s to %s" % (T.green(label), T.underline(path_old), T.underline(path_new)), 0
 
 
-SYSCALL_FILTERS["move"] = [
-    SyscallFilter(
-        syscall="rename",
-        format=lambda pid, args: format_move(full_path(pid, args[0]),
-                                             full_path(pid, args[1])),
-    ),
-    SyscallFilter(
-        syscall="renameat",
-        format=lambda pid, args: format_move(full_path(pid, args[1], args[0]),
-                                             full_path(pid, args[3], args[2])),
-    ),
-    SyscallFilter(
-        syscall="renameat2",
-        format=lambda pid, args: format_move(full_path(pid, args[1], args[0]),
-                                             full_path(pid, args[3], args[2])),
-    ),
-]
+filter_scope = "move"
+
+register_filter(filter_scope, "rename", lambda pid, args:
+                filter_move(full_path(pid, args[0]), full_path(pid, args[1])))
+register_filter(filter_scope, "renameat", lambda pid, args:
+                filter_move(full_path(pid, args[1], args[0]), full_path(pid, args[3], args[2])))
+register_filter(filter_scope, "renameat2", lambda pid, args:
+                filter_move(full_path(pid, args[1], args[0]), full_path(pid, args[3], args[2])))

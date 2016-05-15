@@ -12,36 +12,32 @@ from os.path import exists
 from os import O_WRONLY, O_RDWR, O_APPEND, O_CREAT, O_TRUNC
 from stat import S_IFCHR, S_IFBLK, S_IFIFO, S_IFSOCK
 
-from maybe import SyscallFilter, SYSCALL_FILTERS, T, register_path, is_tracked_descriptor, descriptor_path, full_path
+from maybe import T, register_filter, register_path, is_tracked_descriptor, descriptor_path, full_path
 
 
 allowed_files = set(["/dev/null", "/dev/zero", "/dev/tty"])
 
 
-def format_open(path, flags):
+def filter_open(pid, path, flags):
     if path in allowed_files:
-        return None
-    elif (flags & O_CREAT) and not exists(path):
-        return "%s %s" % (T.cyan("create file"), T.underline(path))
+        return None, None
+    if (flags & O_CREAT) and not exists(path):
+        operation = "%s %s" % (T.cyan("create file"), T.underline(path))
     elif (flags & O_TRUNC) and exists(path):
-        return "%s %s" % (T.red("truncate file"), T.underline(path))
+        operation = "%s %s" % (T.red("truncate file"), T.underline(path))
     else:
-        return None
-
-
-def substitute_open(pid, path, flags):
-    if path in allowed_files:
-        return None
-    elif (flags & O_WRONLY) or (flags & O_RDWR) or (flags & O_APPEND) or (format_open(path, flags) is not None):
+        operation = None
+    if (flags & O_WRONLY) or (flags & O_RDWR) or (flags & O_APPEND) or (operation is not None):
         # File might be written to later, so we need to track the file descriptor
-        return register_path(pid, path)
+        return_value = register_path(pid, path)
     else:
-        return None
+        return_value = None
+    return operation, return_value
 
 
-def format_mknod(path, type):
+def filter_mknod(path, type):
     if exists(path):
-        return None
+        return None, None
     elif (type & S_IFCHR):
         label = "create character special file"
     elif (type & S_IFBLK):
@@ -53,94 +49,38 @@ def format_mknod(path, type):
     else:
         # mknod(2): "Zero file type is equivalent to type S_IFREG"
         label = "create file"
-    return "%s %s" % (T.cyan(label), T.underline(path))
+    return "%s %s" % (T.cyan(label), T.underline(path)), 0
 
 
-def substitute_mknod(path, type):
-    return None if (format_mknod(path, type) is None) else 0
-
-
-def format_write(pid, file_descriptor, byte_count):
+def filter_write(pid, file_descriptor, byte_count):
     if is_tracked_descriptor(pid, file_descriptor):
         path = descriptor_path(pid, file_descriptor)
-        return "%s %s to %s" % (T.red("write"), T.bold("%d bytes" % byte_count), T.underline(path))
+        return "%s %s to %s" % (T.red("write"), T.bold("%d bytes" % byte_count), T.underline(path)), byte_count
     else:
-        return None
+        return None, None
 
 
-def substitute_write(pid, file_descriptor, byte_count):
-    return None if (format_write(pid, file_descriptor, byte_count) is None) else byte_count
-
-
-def substitute_dup(pid, file_descriptor_old, file_descriptor_new=None):
+def filter_dup(pid, file_descriptor_old, file_descriptor_new=None):
     if is_tracked_descriptor(pid, file_descriptor_old):
         # Copy tracked file descriptor
-        return register_path(pid, descriptor_path(pid, file_descriptor_old), file_descriptor_new)
+        return None, register_path(pid, descriptor_path(pid, file_descriptor_old), file_descriptor_new)
     else:
-        return None
+        return None, None
 
 
-SYSCALL_FILTERS["create_write_file"] = [
-    SyscallFilter(
-        syscall="open",
-        format=lambda pid, args: format_open(full_path(pid, args[0]), args[1]),
-        substitute=lambda pid, args: substitute_open(pid, full_path(pid, args[0]), args[1]),
-    ),
-    SyscallFilter(
-        syscall="creat",
-        format=lambda pid, args: format_open(full_path(pid, args[0]), O_CREAT | O_WRONLY | O_TRUNC),
-        substitute=lambda pid, args: substitute_open(pid, full_path(pid, args[0]), O_CREAT | O_WRONLY | O_TRUNC),
-    ),
-    SyscallFilter(
-        syscall="openat",
-        format=lambda pid, args: format_open(full_path(pid, args[1], args[0]), args[2]),
-        substitute=lambda pid, args: substitute_open(pid, full_path(pid, args[1], args[0]), args[2]),
-    ),
-    SyscallFilter(
-        syscall="mknod",
-        format=lambda pid, args: format_mknod(full_path(pid, args[0]), args[1]),
-        substitute=lambda pid, args: substitute_mknod(full_path(pid, args[0]), args[1]),
-    ),
-    SyscallFilter(
-        syscall="mknodat",
-        format=lambda pid, args: format_mknod(full_path(pid, args[1], args[0]), args[2]),
-        substitute=lambda pid, args: substitute_mknod(full_path(pid, args[1], args[0]), args[2]),
-    ),
-    SyscallFilter(
-        syscall="write",
-        format=lambda pid, args: format_write(pid, args[0], args[2]),
-        substitute=lambda pid, args: substitute_write(pid, args[0], args[2]),
-    ),
-    SyscallFilter(
-        syscall="pwrite",
-        format=lambda pid, args: format_write(pid, args[0], args[2]),
-        substitute=lambda pid, args: substitute_write(pid, args[0], args[2]),
-    ),
-    SyscallFilter(
-        syscall="writev",
-        # TODO: Actual byte count is iovcnt * iov.iov_len
-        format=lambda pid, args: format_write(pid, args[0], args[2]),
-        substitute=lambda pid, args: substitute_write(pid, args[0], args[2]),
-    ),
-    SyscallFilter(
-        syscall="pwritev",
-        # TODO: Actual byte count is iovcnt * iov.iov_len
-        format=lambda pid, args: format_write(pid, args[0], args[2]),
-        substitute=lambda pid, args: substitute_write(pid, args[0], args[2]),
-    ),
-    SyscallFilter(
-        syscall="dup",
-        format=lambda pid, args: None,
-        substitute=lambda pid, args: substitute_dup(pid, args[0]),
-    ),
-    SyscallFilter(
-        syscall="dup2",
-        format=lambda pid, args: None,
-        substitute=lambda pid, args: substitute_dup(pid, args[0], args[1]),
-    ),
-    SyscallFilter(
-        syscall="dup3",
-        format=lambda pid, args: None,
-        substitute=lambda pid, args: substitute_dup(pid, args[0], args[1]),
-    ),
-]
+filter_scope = "create_write_file"
+
+register_filter(filter_scope, "open", lambda pid, args: filter_open(pid, full_path(pid, args[0]), args[1]))
+register_filter(filter_scope, "creat", lambda pid, args:
+                filter_open(pid, full_path(pid, args[0]), O_CREAT | O_WRONLY | O_TRUNC))
+register_filter(filter_scope, "openat", lambda pid, args: filter_open(pid, full_path(pid, args[1], args[0]), args[2]))
+register_filter(filter_scope, "mknod", lambda pid, args: filter_mknod(full_path(pid, args[0]), args[1]))
+register_filter(filter_scope, "mknodat", lambda pid, args: filter_mknod(full_path(pid, args[1], args[0]), args[2]))
+register_filter(filter_scope, "write", lambda pid, args: filter_write(pid, args[0], args[2]))
+register_filter(filter_scope, "pwrite", lambda pid, args: filter_write(pid, args[0], args[2]))
+# TODO: Actual byte count is iovcnt * iov.iov_len
+register_filter(filter_scope, "writev", lambda pid, args: filter_write(pid, args[0], args[2]))
+register_filter(filter_scope, "pwritev", lambda pid, args: filter_write(pid, args[0], args[2]))
+register_filter(filter_scope, "dup", lambda pid, args: filter_dup(pid, args[0]))
+register_filter(filter_scope, "dup2", lambda pid, args: filter_dup(pid, args[0], args[1]))
+register_filter(filter_scope, "dup3", lambda pid, args: filter_dup(pid, args[0], args[1]))

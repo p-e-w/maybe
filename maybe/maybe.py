@@ -96,15 +96,13 @@ def get_operations(debugger, syscall_filters, verbose):
                 elif verbose == 2:
                     print(T.bold(syscall.format()))
 
-                syscall_filter = syscall_filters[syscall.name]
-
+                filter_function = syscall_filters[syscall.name]
                 arguments = [parse_argument(argument) for argument in syscall.arguments]
+                operation, return_value = filter_function(process.pid, arguments)
 
-                operation = syscall_filter.format(process.pid, arguments)
                 if operation is not None:
                     operations.append(operation)
 
-                return_value = syscall_filter.substitute(process.pid, arguments)
                 if return_value is not None:
                     # Set invalid syscall number to prevent call execution
                     process.setreg(SYSCALL_REGISTER, -1)
@@ -169,8 +167,8 @@ def main(argv=sys.argv[1:]):
     syscall_filters = {}
 
     for filter_scope in filter_scopes:
-        for syscall_filter in SYSCALL_FILTERS[filter_scope]:
-            syscall_filters[syscall_filter.syscall] = syscall_filter
+        for syscall in SYSCALL_FILTERS[filter_scope]:
+            syscall_filters[syscall] = SYSCALL_FILTERS[filter_scope][syscall]
 
     # Prevent python-ptrace from decoding arguments to keep raw numerical values
     DIRFD_ARGUMENTS.clear()

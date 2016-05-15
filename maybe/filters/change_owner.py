@@ -11,10 +11,10 @@
 from pwd import getpwuid
 from grp import getgrgid
 
-from maybe import SyscallFilter, SYSCALL_FILTERS, T, descriptor_path, full_path
+from maybe import T, register_filter, descriptor_path, full_path
 
 
-def format_change_owner(path, owner, group):
+def filter_change_owner(path, owner, group):
     if owner == -1:
         label = "change group"
         owner = getgrgid(group)[0]
@@ -24,24 +24,16 @@ def format_change_owner(path, owner, group):
     else:
         label = "change owner"
         owner = getpwuid(owner)[0] + ":" + getgrgid(group)[0]
-    return "%s of %s to %s" % (T.yellow(label), T.underline(path), T.bold(owner))
+    return "%s of %s to %s" % (T.yellow(label), T.underline(path), T.bold(owner)), 0
 
 
-SYSCALL_FILTERS["change_owner"] = [
-    SyscallFilter(
-        syscall="chown",
-        format=lambda pid, args: format_change_owner(full_path(pid, args[0]), args[1], args[2]),
-    ),
-    SyscallFilter(
-        syscall="fchown",
-        format=lambda pid, args: format_change_owner(descriptor_path(pid, args[0]), args[1], args[2]),
-    ),
-    SyscallFilter(
-        syscall="lchown",
-        format=lambda pid, args: format_change_owner(full_path(pid, args[0]), args[1], args[2]),
-    ),
-    SyscallFilter(
-        syscall="fchownat",
-        format=lambda pid, args: format_change_owner(full_path(pid, args[1], args[0]), args[2], args[3]),
-    ),
-]
+filter_scope = "change_owner"
+
+register_filter(filter_scope, "chown", lambda pid, args:
+                filter_change_owner(full_path(pid, args[0]), args[1], args[2]))
+register_filter(filter_scope, "fchown", lambda pid, args:
+                filter_change_owner(descriptor_path(pid, args[0]), args[1], args[2]))
+register_filter(filter_scope, "lchown", lambda pid, args:
+                filter_change_owner(full_path(pid, args[0]), args[1], args[2]))
+register_filter(filter_scope, "fchownat", lambda pid, args:
+                filter_change_owner(full_path(pid, args[1], args[0]), args[2], args[3]))

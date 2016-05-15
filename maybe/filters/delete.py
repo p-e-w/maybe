@@ -8,24 +8,15 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from maybe import SyscallFilter, SYSCALL_FILTERS, T, full_path
+from maybe import T, register_filter, full_path
 
 
-def format_delete(path):
-    return "%s %s" % (T.red("delete"), T.underline(path))
+def filter_delete(path):
+    return "%s %s" % (T.red("delete"), T.underline(path)), 0
 
 
-SYSCALL_FILTERS["delete"] = [
-    SyscallFilter(
-        syscall="unlink",
-        format=lambda pid, args: format_delete(full_path(pid, args[0])),
-    ),
-    SyscallFilter(
-        syscall="unlinkat",
-        format=lambda pid, args: format_delete(full_path(pid, args[1], args[0])),
-    ),
-    SyscallFilter(
-        syscall="rmdir",
-        format=lambda pid, args: format_delete(full_path(pid, args[0])),
-    ),
-]
+filter_scope = "delete"
+
+register_filter(filter_scope, "unlink", lambda pid, args: filter_delete(full_path(pid, args[0])))
+register_filter(filter_scope, "unlinkat", lambda pid, args: filter_delete(full_path(pid, args[1], args[0])))
+register_filter(filter_scope, "rmdir", lambda pid, args: filter_delete(full_path(pid, args[0])))

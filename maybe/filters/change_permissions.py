@@ -8,7 +8,7 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from maybe import SyscallFilter, SYSCALL_FILTERS, T, descriptor_path, full_path
+from maybe import T, register_filter, descriptor_path, full_path
 
 
 def format_permissions(permissions):
@@ -20,22 +20,16 @@ def format_permissions(permissions):
     return result
 
 
-def format_change_permissions(path, permissions):
+def filter_change_permissions(path, permissions):
     return "%s of %s to %s" % (T.yellow("change permissions"), T.underline(path),
-                               T.bold(format_permissions(permissions)))
+                               T.bold(format_permissions(permissions))), 0
 
 
-SYSCALL_FILTERS["change_permissions"] = [
-    SyscallFilter(
-        syscall="chmod",
-        format=lambda pid, args: format_change_permissions(full_path(pid, args[0]), args[1]),
-    ),
-    SyscallFilter(
-        syscall="fchmod",
-        format=lambda pid, args: format_change_permissions(descriptor_path(pid, args[0]), args[1]),
-    ),
-    SyscallFilter(
-        syscall="fchmodat",
-        format=lambda pid, args: format_change_permissions(full_path(pid, args[1], args[0]), args[2]),
-    ),
-]
+filter_scope = "change_permissions"
+
+register_filter(filter_scope, "chmod", lambda pid, args:
+                filter_change_permissions(full_path(pid, args[0]), args[1]))
+register_filter(filter_scope, "fchmod", lambda pid, args:
+                filter_change_permissions(descriptor_path(pid, args[0]), args[1]))
+register_filter(filter_scope, "fchmodat", lambda pid, args:
+                filter_change_permissions(full_path(pid, args[1], args[0]), args[2]))
