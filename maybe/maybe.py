@@ -23,6 +23,7 @@ from ptrace.syscall.posix_constants import SYSCALL_ARG_DICT
 from ptrace.syscall.syscall_argument import ARGUMENT_CALLBACK
 
 from . import SYSCALL_FILTERS, T, initialize_terminal
+from .process import Process
 # Filter modules are imported not to use them as symbols, but to execute their top-level code
 from .filters import (delete, move, change_permissions, change_owner,    # noqa
                       create_directory, create_link, create_write_file)  # noqa
@@ -60,6 +61,7 @@ format_options = FunctionCallOptions(
 
 
 def get_operations(debugger, syscall_filters, verbose):
+    processes = {}
     operations = []
 
     while True:
@@ -97,8 +99,11 @@ def get_operations(debugger, syscall_filters, verbose):
                     print(T.bold(syscall.format()))
 
                 filter_function = syscall_filters[syscall.name]
+                if process.pid not in processes:
+                    processes[process.pid] = Process(process)
                 arguments = [parse_argument(argument) for argument in syscall.arguments]
-                operation, return_value = filter_function(process.pid, arguments)
+
+                operation, return_value = filter_function(processes[process.pid], arguments)
 
                 if operation is not None:
                     operations.append(operation)

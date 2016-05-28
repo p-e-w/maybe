@@ -8,11 +8,7 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from os import readlink
-from os.path import join
-
 from blessings import Terminal
-from ptrace.syscall.posix_arg import AT_FDCWD
 
 
 T = Terminal()
@@ -40,40 +36,3 @@ def register_filter(filter_scope, syscall, filter_function):
     if filter_scope not in SYSCALL_FILTERS:
         SYSCALL_FILTERS[filter_scope] = {}
     SYSCALL_FILTERS[filter_scope][syscall] = filter_function
-
-
-# Start with a large number to avoid collisions with other FDs
-next_file_descriptor = 1000000
-file_descriptors = {}
-
-
-def register_path(pid, path, file_descriptor=None):
-    if file_descriptor is None:
-        global next_file_descriptor
-        file_descriptor = next_file_descriptor
-        next_file_descriptor += 1
-    file_descriptors[file_descriptor] = path
-    return file_descriptor
-
-
-def is_tracked_descriptor(pid, file_descriptor):
-    return file_descriptor in file_descriptors
-
-
-def descriptor_path(pid, file_descriptor):
-    if file_descriptor in file_descriptors:
-        return file_descriptors[file_descriptor]
-    else:
-        return readlink("/proc/%d/fd/%d" % (pid, file_descriptor))
-
-
-# Implements the path resolution logic of the "*at" syscalls
-def full_path(pid, path, directory_descriptor=AT_FDCWD):
-    if directory_descriptor == AT_FDCWD:
-        # Current working directory
-        directory = readlink("/proc/%d/cwd" % pid)
-    else:
-        # Directory referred to by directory_descriptor
-        directory = descriptor_path(pid, directory_descriptor)
-    # Note that join will discard directory if path is absolute, as desired
-    return join(directory, path)

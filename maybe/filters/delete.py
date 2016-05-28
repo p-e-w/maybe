@@ -8,7 +8,7 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from maybe import T, register_filter, full_path
+from maybe import T, register_filter
 
 
 def filter_delete(path):
@@ -17,6 +17,6 @@ def filter_delete(path):
 
 filter_scope = "delete"
 
-register_filter(filter_scope, "unlink", lambda pid, args: filter_delete(full_path(pid, args[0])))
-register_filter(filter_scope, "unlinkat", lambda pid, args: filter_delete(full_path(pid, args[1], args[0])))
-register_filter(filter_scope, "rmdir", lambda pid, args: filter_delete(full_path(pid, args[0])))
+register_filter(filter_scope, "unlink", lambda process, args: filter_delete(process.full_path(args[0])))
+register_filter(filter_scope, "unlinkat", lambda process, args: filter_delete(process.full_path(args[1], args[0])))
+register_filter(filter_scope, "rmdir", lambda process, args: filter_delete(process.full_path(args[0])))

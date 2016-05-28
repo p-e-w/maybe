@@ -10,7 +10,7 @@
 
 from os.path import dirname, basename
 
-from maybe import T, register_filter, full_path
+from maybe import T, register_filter
 
 
 def filter_move(path_old, path_new):
@@ -24,9 +24,9 @@ def filter_move(path_old, path_new):
 
 filter_scope = "move"
 
-register_filter(filter_scope, "rename", lambda pid, args:
-                filter_move(full_path(pid, args[0]), full_path(pid, args[1])))
-register_filter(filter_scope, "renameat", lambda pid, args:
-                filter_move(full_path(pid, args[1], args[0]), full_path(pid, args[3], args[2])))
-register_filter(filter_scope, "renameat2", lambda pid, args:
-                filter_move(full_path(pid, args[1], args[0]), full_path(pid, args[3], args[2])))
+register_filter(filter_scope, "rename", lambda process, args:
+                filter_move(process.full_path(args[0]), process.full_path(args[1])))
+register_filter(filter_scope, "renameat", lambda process, args:
+                filter_move(process.full_path(args[1], args[0]), process.full_path(args[3], args[2])))
+register_filter(filter_scope, "renameat2", lambda process, args:
+                filter_move(process.full_path(args[1], args[0]), process.full_path(args[3], args[2])))

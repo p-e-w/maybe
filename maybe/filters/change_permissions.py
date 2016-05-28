@@ -8,7 +8,7 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from maybe import T, register_filter, descriptor_path, full_path
+from maybe import T, register_filter
 
 
 def format_permissions(permissions):
@@ -27,9 +27,9 @@ def filter_change_permissions(path, permissions):
 
 filter_scope = "change_permissions"
 
-register_filter(filter_scope, "chmod", lambda pid, args:
-                filter_change_permissions(full_path(pid, args[0]), args[1]))
-register_filter(filter_scope, "fchmod", lambda pid, args:
-                filter_change_permissions(descriptor_path(pid, args[0]), args[1]))
-register_filter(filter_scope, "fchmodat", lambda pid, args:
-                filter_change_permissions(full_path(pid, args[1], args[0]), args[2]))
+register_filter(filter_scope, "chmod", lambda process, args:
+                filter_change_permissions(process.full_path(args[0]), args[1]))
+register_filter(filter_scope, "fchmod", lambda process, args:
+                filter_change_permissions(process.descriptor_path(args[0]), args[1]))
+register_filter(filter_scope, "fchmodat", lambda process, args:
+                filter_change_permissions(process.full_path(args[1], args[0]), args[2]))

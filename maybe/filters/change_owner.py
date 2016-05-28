@@ -11,7 +11,7 @@
 from pwd import getpwuid
 from grp import getgrgid
 
-from maybe import T, register_filter, descriptor_path, full_path
+from maybe import T, register_filter
 
 
 def filter_change_owner(path, owner, group):
@@ -29,11 +29,11 @@ def filter_change_owner(path, owner, group):
 
 filter_scope = "change_owner"
 
-register_filter(filter_scope, "chown", lambda pid, args:
-                filter_change_owner(full_path(pid, args[0]), args[1], args[2]))
-register_filter(filter_scope, "fchown", lambda pid, args:
-                filter_change_owner(descriptor_path(pid, args[0]), args[1], args[2]))
-register_filter(filter_scope, "lchown", lambda pid, args:
-                filter_change_owner(full_path(pid, args[0]), args[1], args[2]))
-register_filter(filter_scope, "fchownat", lambda pid, args:
-                filter_change_owner(full_path(pid, args[1], args[0]), args[2], args[3]))
+register_filter(filter_scope, "chown", lambda process, args:
+                filter_change_owner(process.full_path(args[0]), args[1], args[2]))
+register_filter(filter_scope, "fchown", lambda process, args:
+                filter_change_owner(process.descriptor_path(args[0]), args[1], args[2]))
+register_filter(filter_scope, "lchown", lambda process, args:
+                filter_change_owner(process.full_path(args[0]), args[1], args[2]))
+register_filter(filter_scope, "fchownat", lambda process, args:
+                filter_change_owner(process.full_path(args[1], args[0]), args[2], args[3]))

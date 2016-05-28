@@ -8,7 +8,7 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
-from maybe import T, register_filter, full_path
+from maybe import T, register_filter
 
 
 def filter_create_link(path_source, path_target, symbolic):
@@ -18,11 +18,11 @@ def filter_create_link(path_source, path_target, symbolic):
 
 filter_scope = "create_link"
 
-register_filter(filter_scope, "link", lambda pid, args:
-                filter_create_link(full_path(pid, args[1]), full_path(pid, args[0]), False))
-register_filter(filter_scope, "linkat", lambda pid, args:
-                filter_create_link(full_path(pid, args[3], args[2]), full_path(pid, args[1], args[0]), False))
-register_filter(filter_scope, "symlink", lambda pid, args:
-                filter_create_link(full_path(pid, args[1]), full_path(pid, args[0]), True))
-register_filter(filter_scope, "symlinkat", lambda pid, args:
-                filter_create_link(full_path(pid, args[2], args[1]), full_path(pid, args[0]), True))
+register_filter(filter_scope, "link", lambda process, args:
+                filter_create_link(process.full_path(args[1]), process.full_path(args[0]), False))
+register_filter(filter_scope, "linkat", lambda process, args:
+                filter_create_link(process.full_path(args[3], args[2]), process.full_path(args[1], args[0]), False))
+register_filter(filter_scope, "symlink", lambda process, args:
+                filter_create_link(process.full_path(args[1]), process.full_path(args[0]), True))
+register_filter(filter_scope, "symlinkat", lambda process, args:
+                filter_create_link(process.full_path(args[2], args[1]), process.full_path(args[0]), True))
