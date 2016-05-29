@@ -118,8 +118,6 @@ def get_operations(debugger, syscall_filters, verbose):
 
 
 def main(argv=sys.argv[1:]):
-    filter_scopes = sorted(SYSCALL_FILTERS.keys())
-
     # Insert positional argument separator, if not already present
     if "--" not in argv:
         for i, argument in enumerate(argv):
@@ -137,11 +135,13 @@ def main(argv=sys.argv[1:]):
     )
     arg_parser.add_argument("command", nargs="+", help="the command to run under maybe's control")
     arg_group = arg_parser.add_mutually_exclusive_group()
-    arg_group.add_argument("-a", "--allow", nargs="+", choices=filter_scopes, metavar="OPERATION",
+    arg_group.add_argument("-a", "--allow", nargs="+", metavar="OPERATION",
                            help="allow the command to perform the specified operation(s). " +
                                 "all other operations will be denied. " +
-                                "possible values for %(metavar)s are: %(choices)s")
-    arg_group.add_argument("-d", "--deny", nargs="+", choices=filter_scopes, metavar="OPERATION",
+                                "possible values for %(metavar)s are: " +
+                                ", ".join(sorted(SYSCALL_FILTERS.keys())) +
+                                "; as well as any filter scopes defined by loaded plugins")
+    arg_group.add_argument("-d", "--deny", nargs="+", metavar="OPERATION",
                            help="deny the command the specified operation(s). " +
                                 "all other operations will be allowed. " +
                                 "see --allow for a list of possible values for %(metavar)s. " +
@@ -175,8 +175,16 @@ def main(argv=sys.argv[1:]):
                 return 1
 
     if args.allow is not None:
+        for filter_scope in args.allow:
+            if filter_scope not in SYSCALL_FILTERS:
+                print(T.red("Unknown operation in --allow: %s." % (T.bold(filter_scope) + T.red)))
+                return 1
         filter_scopes = set(SYSCALL_FILTERS.keys()) - set(args.allow)
     elif args.deny is not None:
+        for filter_scope in args.deny:
+            if filter_scope not in SYSCALL_FILTERS:
+                print(T.red("Unknown operation in --deny: %s." % (T.bold(filter_scope) + T.red)))
+                return 1
         filter_scopes = args.deny
     else:
         filter_scopes = SYSCALL_FILTERS.keys()
