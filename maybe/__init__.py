@@ -8,6 +8,8 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
+from collections import OrderedDict
+
 from blessings import Terminal
 
 
@@ -29,7 +31,10 @@ def initialize_terminal(style_output):
     }[style_output])
 
 
-SYSCALL_FILTERS = {}
+# Use of an ordered dictionary ensures that plugin-defined filters
+# (which are registered after built-in filters) are processed last
+# and thus override all built-in filters hooking the same syscall
+SYSCALL_FILTERS = OrderedDict()
 
 
 def register_filter(filter_scope, syscall, filter_function):

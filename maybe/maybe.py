@@ -10,8 +10,10 @@
 
 import sys
 import subprocess
+from imp import load_source
 from argparse import ArgumentParser
 from logging import getLogger, NullHandler
+from os.path import splitext, basename
 
 from six.moves import input
 from ptrace.tools import locateProgram
@@ -144,6 +146,9 @@ def main(argv=sys.argv[1:]):
                                 "all other operations will be allowed. " +
                                 "see --allow for a list of possible values for %(metavar)s. " +
                                 "--allow and --deny cannot be combined")
+    arg_parser.add_argument("-p", "--plugin", nargs="+", metavar="FILE",
+                            help="load the specified plugin script(s). " +
+                                 "see the README for details and plugin API documentation")
     arg_parser.add_argument("-l", "--list-only", action="store_true",
                             help="list operations without header, indentation and rerun prompt")
     arg_parser.add_argument("--style-output", choices=["yes", "no", "auto"], default="auto",
@@ -157,16 +162,31 @@ def main(argv=sys.argv[1:]):
 
     initialize_terminal(args.style_output)
 
+    if args.plugin is not None:
+        for plugin_path in args.plugin:
+            try:
+                module_name = splitext(basename(plugin_path))[0]
+                # Note: imp.load_source is *long* deprecated and not even documented
+                # in Python 3 anymore, but it still seems to work and the "alternatives"
+                # (see http://stackoverflow.com/a/67692) are simply too insane to use
+                load_source(module_name, plugin_path)
+            except Exception as error:
+                print(T.red("Error loading %s: %s." % (T.bold(plugin_path) + T.red, error)))
+                return 1
+
     if args.allow is not None:
-        filter_scopes = set(filter_scopes) - set(args.allow)
+        filter_scopes = set(SYSCALL_FILTERS.keys()) - set(args.allow)
     elif args.deny is not None:
         filter_scopes = args.deny
+    else:
+        filter_scopes = SYSCALL_FILTERS.keys()
 
     syscall_filters = {}
 
-    for filter_scope in filter_scopes:
-        for syscall in SYSCALL_FILTERS[filter_scope]:
-            syscall_filters[syscall] = SYSCALL_FILTERS[filter_scope][syscall]
+    for filter_scope in SYSCALL_FILTERS:
+        if filter_scope in filter_scopes:
+            for syscall in SYSCALL_FILTERS[filter_scope]:
+                syscall_filters[syscall] = SYSCALL_FILTERS[filter_scope][syscall]
 
     # Prevent python-ptrace from decoding arguments to keep raw numerical values
     DIRFD_ARGUMENTS.clear()
