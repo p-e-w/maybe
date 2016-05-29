@@ -13,6 +13,7 @@ import subprocess
 from argparse import ArgumentParser
 from logging import getLogger, NullHandler
 
+from six.moves import input
 from ptrace.tools import locateProgram
 from ptrace.debugger import ProcessSignal, NewProcessEvent, ProcessExecution, ProcessExit
 from ptrace.debugger.child import createChild
@@ -27,14 +28,6 @@ from .process import Process
 # Filter modules are imported not to use them as symbols, but to execute their top-level code
 from .filters import (delete, move, change_permissions, change_owner,    # noqa
                       create_directory, create_link, create_write_file)  # noqa
-
-
-# Python 2/3 compatibility hack
-# Source: http://stackoverflow.com/a/7321970
-try:
-    input = raw_input
-except NameError:
-    pass
 
 
 # Suppress logging output from python-ptrace

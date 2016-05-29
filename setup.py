@@ -42,6 +42,7 @@ setup(
     packages=["maybe"],
 
     install_requires=[
+        "six==1.10.0",
         "blessings==1.6",
         "python-ptrace==0.9",
     ],
