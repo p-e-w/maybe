@@ -22,11 +22,9 @@ def filter_move(path_old, path_new):
     return "%s %s to %s" % (T.green(label), T.underline(path_old), T.underline(path_new)), 0
 
 
-filter_scope = "move"
-
-register_filter(filter_scope, "rename", lambda process, args:
+register_filter("rename", lambda process, args:
                 filter_move(process.full_path(args[0]), process.full_path(args[1])))
-register_filter(filter_scope, "renameat", lambda process, args:
+register_filter("renameat", lambda process, args:
                 filter_move(process.full_path(args[1], args[0]), process.full_path(args[3], args[2])))
-register_filter(filter_scope, "renameat2", lambda process, args:
+register_filter("renameat2", lambda process, args:
                 filter_move(process.full_path(args[1], args[0]), process.full_path(args[3], args[2])))

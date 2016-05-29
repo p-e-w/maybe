@@ -16,13 +16,11 @@ def filter_create_link(path_source, path_target, symbolic):
     return "%s from %s to %s" % (T.cyan(label), T.underline(path_source), T.underline(path_target)), 0
 
 
-filter_scope = "create_link"
-
-register_filter(filter_scope, "link", lambda process, args:
+register_filter("link", lambda process, args:
                 filter_create_link(process.full_path(args[1]), process.full_path(args[0]), False))
-register_filter(filter_scope, "linkat", lambda process, args:
+register_filter("linkat", lambda process, args:
                 filter_create_link(process.full_path(args[3], args[2]), process.full_path(args[1], args[0]), False))
-register_filter(filter_scope, "symlink", lambda process, args:
+register_filter("symlink", lambda process, args:
                 filter_create_link(process.full_path(args[1]), process.full_path(args[0]), True))
-register_filter(filter_scope, "symlinkat", lambda process, args:
+register_filter("symlinkat", lambda process, args:
                 filter_create_link(process.full_path(args[2], args[1]), process.full_path(args[0]), True))

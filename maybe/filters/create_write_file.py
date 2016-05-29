@@ -68,23 +68,21 @@ def filter_dup(process, file_descriptor_old, file_descriptor_new=None):
         return None, None
 
 
-filter_scope = "create_write_file"
-
-register_filter(filter_scope, "open", lambda process, args:
+register_filter("open", lambda process, args:
                 filter_open(process, process.full_path(args[0]), args[1]))
-register_filter(filter_scope, "creat", lambda process, args:
+register_filter("creat", lambda process, args:
                 filter_open(process, process.full_path(args[0]), O_CREAT | O_WRONLY | O_TRUNC))
-register_filter(filter_scope, "openat", lambda process, args:
+register_filter("openat", lambda process, args:
                 filter_open(process, process.full_path(args[1], args[0]), args[2]))
-register_filter(filter_scope, "mknod", lambda process, args:
+register_filter("mknod", lambda process, args:
                 filter_mknod(process.full_path(args[0]), args[1]))
-register_filter(filter_scope, "mknodat", lambda process, args:
+register_filter("mknodat", lambda process, args:
                 filter_mknod(process.full_path(args[1], args[0]), args[2]))
-register_filter(filter_scope, "write", lambda process, args: filter_write(process, args[0], args[2]))
-register_filter(filter_scope, "pwrite", lambda process, args: filter_write(process, args[0], args[2]))
+register_filter("write", lambda process, args: filter_write(process, args[0], args[2]))
+register_filter("pwrite", lambda process, args: filter_write(process, args[0], args[2]))
 # TODO: Actual byte count is iovcnt * iov.iov_len
-register_filter(filter_scope, "writev", lambda process, args: filter_write(process, args[0], args[2]))
-register_filter(filter_scope, "pwritev", lambda process, args: filter_write(process, args[0], args[2]))
-register_filter(filter_scope, "dup", lambda process, args: filter_dup(process, args[0]))
-register_filter(filter_scope, "dup2", lambda process, args: filter_dup(process, args[0], args[1]))
-register_filter(filter_scope, "dup3", lambda process, args: filter_dup(process, args[0], args[1]))
+register_filter("writev", lambda process, args: filter_write(process, args[0], args[2]))
+register_filter("pwritev", lambda process, args: filter_write(process, args[0], args[2]))
+register_filter("dup", lambda process, args: filter_dup(process, args[0]))
+register_filter("dup2", lambda process, args: filter_dup(process, args[0], args[1]))
+register_filter("dup3", lambda process, args: filter_dup(process, args[0], args[1]))

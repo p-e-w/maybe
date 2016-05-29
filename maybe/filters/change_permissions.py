@@ -25,11 +25,9 @@ def filter_change_permissions(path, permissions):
                                T.bold(format_permissions(permissions))), 0
 
 
-filter_scope = "change_permissions"
-
-register_filter(filter_scope, "chmod", lambda process, args:
+register_filter("chmod", lambda process, args:
                 filter_change_permissions(process.full_path(args[0]), args[1]))
-register_filter(filter_scope, "fchmod", lambda process, args:
+register_filter("fchmod", lambda process, args:
                 filter_change_permissions(process.descriptor_path(args[0]), args[1]))
-register_filter(filter_scope, "fchmodat", lambda process, args:
+register_filter("fchmodat", lambda process, args:
                 filter_change_permissions(process.full_path(args[1], args[0]), args[2]))

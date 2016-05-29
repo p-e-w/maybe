@@ -27,13 +27,11 @@ def filter_change_owner(path, owner, group):
     return "%s of %s to %s" % (T.yellow(label), T.underline(path), T.bold(owner)), 0
 
 
-filter_scope = "change_owner"
-
-register_filter(filter_scope, "chown", lambda process, args:
+register_filter("chown", lambda process, args:
                 filter_change_owner(process.full_path(args[0]), args[1], args[2]))
-register_filter(filter_scope, "fchown", lambda process, args:
+register_filter("fchown", lambda process, args:
                 filter_change_owner(process.descriptor_path(args[0]), args[1], args[2]))
-register_filter(filter_scope, "lchown", lambda process, args:
+register_filter("lchown", lambda process, args:
                 filter_change_owner(process.full_path(args[0]), args[1], args[2]))
-register_filter(filter_scope, "fchownat", lambda process, args:
+register_filter("fchownat", lambda process, args:
                 filter_change_owner(process.full_path(args[1], args[0]), args[2], args[3]))

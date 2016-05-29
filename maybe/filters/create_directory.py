@@ -15,9 +15,7 @@ def filter_create_directory(path):
     return "%s %s" % (T.cyan("create directory"), T.underline(path)), 0
 
 
-filter_scope = "create_directory"
-
-register_filter(filter_scope, "mkdir", lambda process, args:
+register_filter("mkdir", lambda process, args:
                 filter_create_directory(process.full_path(args[0])))
-register_filter(filter_scope, "mkdirat", lambda process, args:
+register_filter("mkdirat", lambda process, args:
                 filter_create_directory(process.full_path(args[1], args[0])))
