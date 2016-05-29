@@ -1,11 +1,7 @@
-try:
-    # Python 2
-    from StringIO import StringIO
-except ImportError:
-    # Python 3
-    from io import StringIO
 import sys
 import shlex
+
+from six import StringIO
 
 from maybe.maybe import main as maybe_main
 
