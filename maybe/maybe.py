@@ -32,10 +32,6 @@ from .filters import (delete, move, change_permissions, change_owner,    # noqa
                       create_directory, create_link, create_write_file)  # noqa
 
 
-# Suppress logging output from python-ptrace
-getLogger().addHandler(NullHandler())
-
-
 def parse_argument(argument):
     argument = argument.createText()
     if argument.startswith(("'", '"')):
@@ -49,13 +45,12 @@ def parse_argument(argument):
         return int(argument, 0)
 
 
-format_options = FunctionCallOptions(
-    replace_socketcall=False,
-    string_max_length=4096,
-)
-
-
 def get_operations(debugger, syscall_filters, verbose):
+    format_options = FunctionCallOptions(
+        replace_socketcall=False,
+        string_max_length=4096,
+    )
+
     processes = {}
     operations = []
 
@@ -195,6 +190,9 @@ def main(argv=sys.argv[1:]):
         if filter_scope in filter_scopes:
             for syscall in SYSCALL_FILTERS[filter_scope]:
                 syscall_filters[syscall] = SYSCALL_FILTERS[filter_scope][syscall]
+
+    # Suppress logging output from python-ptrace
+    getLogger().addHandler(NullHandler())
 
     # Prevent python-ptrace from decoding arguments to keep raw numerical values
     DIRFD_ARGUMENTS.clear()
