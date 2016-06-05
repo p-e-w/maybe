@@ -116,6 +116,45 @@ Add the filter `filter_function` to the filter registry. If the filter is enable
 
 When called, `filter_function` must return a tuple `(operation, return_value)`. `operation` can either be a string description of the operation that was prevented by the filter, to be printed after the process terminates, or `None`, in which case nothing will be printed. `return_value` can either be a numerical value, in which case the syscall invocation will be prevented and the return value received by the caller will be set to that value, or `None`, in which case the invocation will be allowed to proceed as normal.
 
+### Example
+
+Here, `maybe`'s plugin API is used to implement an exotic type of access control: Restricting read access based on the *content* of the file in question. If a file being opened for reading contains the word **SECRET**, the plugin blocks the `open`/`openat` syscall and returns an error.
+
+#### `read_secret_file.py`
+
+```python
+from os import O_WRONLY
+from os.path import isfile
+from maybe import T, register_filter
+
+def filter_open(path, flags):
+    if path.startswith("/home/") and isfile(path) and not (flags & O_WRONLY):
+        with open(path, "r") as f:
+            if "SECRET" in f.read():
+                return "%s %s" % (T.red("read secret file"), T.underline(path)), -1
+            else:
+                return None, None
+    else:
+        return None, None
+
+register_filter("open", lambda process, args:
+                filter_open(process.full_path(args[0]), args[1]))
+register_filter("openat", lambda process, args:
+                filter_open(process.full_path(args[1], args[0]), args[2]))
+```
+
+Indeed, the plugin works as expected:
+
+```
+[user@localhost]$ maybe --plugin read_secret_file.py --deny read_secret_file -- bash
+$ echo "This is a normal file." > file_1
+$ echo "This is a SECRET file." > file_2
+$ cat file_1
+This is a normal file.
+$ cat file_2
+cat: file_2: Operation not permitted
+```
+
 
 ## License
 
