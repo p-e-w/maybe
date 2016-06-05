@@ -73,19 +73,29 @@ in its main directory to install the package in editable mode.
 
 ## Usage
 
-### Command line
-
 ```
-maybe COMMAND [ARGUMENT]...
+maybe [options] command [argument ...]
 ```
 
-No other command line parameters are currently accepted.
+### Positional arguments
 
-### Example
+| Argument | Description |
+| --- | --- |
+| `command` | the command to run under `maybe`'s control |
+| `argument ...` | argument(s) to pass to `command` |
 
-```
-maybe mkdir test
-```
+### Optional arguments
+
+| Argument | Description |
+| --- | --- |
+| `-a OPERATION ...`,<br>`--allow OPERATION ...`<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | allow the command to perform the specified operation(s). all other operations will be denied. possible values for `OPERATION` are: `change_owner`, `change_permissions`, `create_directory`, `create_link`, `create_write_file`, `delete`, `move`; as well as any filter scopes defined by loaded plugins |
+| `-d OPERATION ...`,<br>`--deny OPERATION ...` | deny the command the specified operation(s). all other operations will be allowed. see `--allow` for a list of possible values for `OPERATION`. `--allow` and `--deny` cannot be combined |
+| `-p FILE ...`,<br>`--plugin FILE ...` | load the specified plugin script(s) |
+| `-l`, `--list-only` | list operations without header, indentation and rerun prompt |
+| `--style-output {yes,no,auto}` | colorize output using ANSI escape sequences (`yes`/`no`) or automatically decide based on whether stdout is a terminal (`auto`, default) |
+| `-v`, `--verbose` | if specified once, print every filtered syscall. if specified twice, print every syscall, highlighting filtered syscalls |
+| `--version` | show program's version number and exit |
+| `-h`, `--help` | show a help message and exit |
 
 
 ## License
