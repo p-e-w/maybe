@@ -1,12 +1,5 @@
-from common import maybe
+from common import tf
 
 
 def test_delete_file(tmpdir):
-    myfile = tmpdir.join("myfile")
-    # File does not yet exist (will be created when written to)
-    assert not myfile.check()
-    myfile.write("mycontent")
-    assert myfile.check()
-    assert maybe("-l rm %s" % myfile) == ("delete %s" % myfile)
-    # File still exists (was not deleted)
-    assert myfile.check()
+    tf(tmpdir, "rm '{f}'", "delete {f}", "delete", lambda f: f.check())
