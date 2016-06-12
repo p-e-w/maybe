@@ -17,7 +17,7 @@ def maybe(arguments):
 
 def to_unicode(string):
     if PY2:
-        return unicode(string, sys.getfilesystemencoding())
+        return unicode(string, sys.getfilesystemencoding())  # noqa
     else:
         return string
 

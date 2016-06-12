@@ -42,7 +42,7 @@ def parse_argument(argument):
     # (see http://stackoverflow.com/a/24886425)
     argument = literal_eval(argument.createText())
     if PY2 and isinstance(argument, str):
-        argument = unicode(argument, sys.getfilesystemencoding())
+        argument = unicode(argument, sys.getfilesystemencoding())  # noqa
     return argument
 
 
@@ -115,7 +115,7 @@ def get_operations(debugger, syscall_filters, verbose):
 
 def main(argv=sys.argv[1:]):
     if PY2:
-        argv = [unicode(arg, sys.getfilesystemencoding()) for arg in argv]
+        argv = [unicode(arg, sys.getfilesystemencoding()) for arg in argv]  # noqa
 
     # Insert positional argument separator, if not already present
     if "--" not in argv:
