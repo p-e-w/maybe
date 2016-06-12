@@ -8,13 +8,17 @@
 # (https://gnu.org/licenses/gpl.html)
 
 
+from __future__ import unicode_literals, print_function
+
 import sys
 import subprocess
 from imp import load_source
+from ast import literal_eval
 from argparse import ArgumentParser
 from logging import getLogger, NullHandler
 from os.path import splitext, basename
 
+from six import PY2
 from six.moves import input
 from ptrace.tools import locateProgram
 from ptrace.debugger import ProcessSignal, NewProcessEvent, ProcessExecution, ProcessExit
@@ -33,16 +37,13 @@ from .filters import (delete, move, change_permissions, change_owner,    # noqa
 
 
 def parse_argument(argument):
-    argument = argument.createText()
-    if argument.startswith(("'", '"')):
-        # Remove quotes from string argument
-        return argument[1:-1]
-    elif argument.startswith(("b'", 'b"')):
-        # Python 3 bytes literal
-        return argument[2:-1]
-    else:
-        # Note that "int" with base 0 infers the base from the prefix
-        return int(argument, 0)
+    # createText() uses repr() to render the argument,
+    # for which literal_eval() acts as an inverse function
+    # (see http://stackoverflow.com/a/24886425)
+    argument = literal_eval(argument.createText())
+    if PY2 and isinstance(argument, str):
+        argument = unicode(argument, sys.getfilesystemencoding())
+    return argument
 
 
 def get_operations(debugger, syscall_filters, verbose):
@@ -113,6 +114,9 @@ def get_operations(debugger, syscall_filters, verbose):
 
 
 def main(argv=sys.argv[1:]):
+    if PY2:
+        argv = [unicode(arg, sys.getfilesystemencoding()) for arg in argv]
+
     # Insert positional argument separator, if not already present
     if "--" not in argv:
         for i, argument in enumerate(argv):
@@ -236,8 +240,9 @@ def main(argv=sys.argv[1:]):
         for operation in operations:
             print(("" if args.list_only else "  ") + operation)
         if not args.list_only:
+            print("\nDo you want to rerun %s and permit these operations? [y/N] " % T.bold(command), end="")
             try:
-                choice = input("\nDo you want to rerun %s and permit these operations? [y/N] " % T.bold(command))
+                choice = input()
             except KeyboardInterrupt:
                 choice = ""
                 # Ctrl+C does not print a newline automatically
