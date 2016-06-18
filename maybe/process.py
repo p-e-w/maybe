@@ -9,7 +9,7 @@
 
 
 from os import readlink
-from os.path import join
+from os.path import normpath, join
 
 from ptrace.syscall.posix_arg import AT_FDCWD
 
@@ -33,9 +33,10 @@ class Process(object):
 
     def descriptor_path(self, file_descriptor):
         if file_descriptor in self._file_descriptors:
-            return self._file_descriptors[file_descriptor]
+            path = self._file_descriptors[file_descriptor]
         else:
-            return readlink("/proc/%d/fd/%d" % (self._process.pid, file_descriptor))
+            path = readlink("/proc/%d/fd/%d" % (self._process.pid, file_descriptor))
+        return normpath(path)
 
     # Implements the path resolution logic of the "*at" syscalls
     def full_path(self, path, directory_descriptor=AT_FDCWD):
@@ -46,4 +47,4 @@ class Process(object):
             # Directory referred to by directory_descriptor
             directory = self.descriptor_path(directory_descriptor)
         # Note that join will discard directory if path is absolute, as desired
-        return join(directory, path)
+        return normpath(join(directory, path))
