@@ -1,3 +1,4 @@
+import os
 import sys
 import shlex
 from os import getcwd, chdir
@@ -33,6 +34,15 @@ def working_directory(directory):
         yield
     finally:
         chdir(original_directory)
+
+
+@contextmanager
+def umask(mask):
+    original_mask = os.umask(mask)
+    try:
+        yield
+    finally:
+        os.umask(original_mask)
 
 
 @contextmanager
