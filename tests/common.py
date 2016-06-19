@@ -1,6 +1,6 @@
-import os
 import sys
 import shlex
+from os import getcwd, chdir
 from contextlib import contextmanager
 
 from six import PY2, StringIO
@@ -27,12 +27,12 @@ def to_unicode(string):
 # Source: http://stackoverflow.com/a/431747
 @contextmanager
 def working_directory(directory):
-    original_directory = os.getcwd()
+    original_directory = getcwd()
     try:
-        os.chdir(str(directory))
+        chdir(str(directory))
         yield
     finally:
-        os.chdir(original_directory)
+        chdir(original_directory)
 
 
 @contextmanager
@@ -51,6 +51,7 @@ def tf(directory, command, output, operation, test):
         assert not f.check()
         f.write("abc")
         assert f.check()
+        assert test(f)
         cmd = command.format(f=f_arg)
         # Test for expected output and provided test condition
         assert maybe("-l -- " + cmd) == to_unicode(output.format(f=f))
