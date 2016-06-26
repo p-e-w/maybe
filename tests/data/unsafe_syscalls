@@ -1,0 +1,75 @@
+# Generated with
+#   whatis -l -s 2 -r . | sed "s/(2)\s*//"
+# followed by manually removing harmless syscalls
+
+_sysctl - read/write system parameters
+adjtimex - tune kernel clock
+chmod - change permissions of a file
+chown - change ownership of a file
+chown32 - change ownership of a file
+clock_settime - clock and time functions
+creat - open and possibly create a file
+dup - duplicate a file descriptor
+dup2 - duplicate a file descriptor
+dup3 - duplicate a file descriptor
+fallocate - manipulate file space
+fchmod - change permissions of a file
+fchmodat - change permissions of a file
+fchown - change ownership of a file
+fchown32 - change ownership of a file
+fchownat - change ownership of a file
+fcntl - manipulate file descriptor
+fcntl64 - manipulate file descriptor
+fremovexattr - remove an extended attribute
+fsetxattr - set an extended attribute value
+ftruncate - truncate a file to a specified length
+ftruncate64 - truncate a file to a specified length
+utimensat - change file timestamps with nanosecond precision
+futimesat - change timestamps of a file relative to a directory file descriptor
+kill - send signal to a process
+killpg - send signal to a process group
+syslog - read and/or clear kernel message ring buffer; set console_loglevel
+lchown - change ownership of a file
+lchown32 - change ownership of a file
+link - make a new name for a file
+linkat - make a new name for a file
+lremovexattr - remove an extended attribute
+lsetxattr - set an extended attribute value
+mkdir - create a directory
+mkdirat - create a directory
+mknod - create a special or ordinary file
+mknodat - create a special or ordinary file
+mmap - map or unmap files or devices into memory
+mmap2 - map files or devices into memory
+name_to_handle_at - obtain handle for a pathname and open file via a handle
+open - open and possibly create a file
+open_by_handle_at - obtain handle for a pathname and open file via a handle
+openat - open and possibly create a file
+pwrite - read from or write to a file descriptor at a given offset
+pwrite64 - read from or write to a file descriptor at a given offset
+pwritev - read or write data into multiple buffers
+reboot - reboot or enable/disable Ctrl-Alt-Del
+removexattr - remove an extended attribute
+rename - change the name or location of a file
+renameat - change the name or location of a file
+renameat2 - change the name or location of a file
+rmdir - delete a directory
+sendfile - transfer data between file descriptors
+sendfile64 - transfer data between file descriptors
+setdomainname - get/set NIS domain name
+sethostid - get or set the unique identifier of the current host
+sethostname - get/set hostname
+settimeofday - get / set time
+setxattr - set an extended attribute value
+stime - set time
+symlink - make a new name for a file
+symlinkat - make a new name for a file
+sysctl - read/write system parameters
+truncate - truncate a file to a specified length
+truncate64 - truncate a file to a specified length
+unlink - delete a name and possibly the file it refers to
+unlinkat - delete a name and possibly the file it refers to
+utime - change file last access and modification times
+utimes - change file last access and modification times
+write - write to a file descriptor
+writev - read or write data into multiple buffers
