@@ -158,6 +158,6 @@ cat: file_2: Operation not permitted
 
 ## License
 
-Copyright &copy; 2016 Philipp Emanuel Weidmann (<pew@worldwidemann.com>)
+Copyright &copy; 2016-2017 Philipp Emanuel Weidmann (<pew@worldwidemann.com>)
 
 Released under the terms of the [GNU General Public License, version 3](https://gnu.org/licenses/gpl.html)
