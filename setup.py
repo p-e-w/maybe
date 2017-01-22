@@ -44,7 +44,7 @@ setup(
     install_requires=[
         "six==1.10.0",
         "blessings==1.6",
-        "python-ptrace==0.9",
+        "python-ptrace==0.9.1",
     ],
 
     setup_requires=[

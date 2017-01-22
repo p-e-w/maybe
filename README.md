@@ -45,7 +45,7 @@ Are you sure? Are you *one hundred percent* sure?
 
 ## What is this sorcery?!?
 
-`maybe` runs processes under the control of [ptrace](https://en.wikipedia.org/wiki/Ptrace) (with the help of the excellent [python-ptrace](https://bitbucket.org/haypo/python-ptrace/) library). When it intercepts a system call that is about to make changes to the file system, it logs that call, and then modifies CPU registers to both redirect the call to an invalid syscall ID (effectively turning it into a no-op) and set the return value of that no-op call to one indicating success of the original call.
+`maybe` runs processes under the control of [ptrace](https://en.wikipedia.org/wiki/Ptrace) (with the help of the excellent [python-ptrace](https://github.com/haypo/python-ptrace) library). When it intercepts a system call that is about to make changes to the file system, it logs that call, and then modifies CPU registers to both redirect the call to an invalid syscall ID (effectively turning it into a no-op) and set the return value of that no-op call to one indicating success of the original call.
 
 As a result, the process believes that everything it is trying to do is actually happening, when in reality nothing is.
 
